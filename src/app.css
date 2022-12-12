@@ -1,3 +1,33 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+    /*
+    darker bg rgb 32 34 37
+    hover message bg rgb 50 53 59
+    message bg rgb 54 57 63
+    chat colors:
+    	chat background rgb 64 68 75
+    	chat text rgb 220 221 222
+    	chat label rgb 114 118 125
+    	svg background same as chat bg
+    	svg font color rgb 220 221 222
+    	caret rgb 220 221 222
+    */
+
+    --color-bg-dark: 32 34 37;
+    --color-bg-default: 54 57 63;
+    --color-bg-hover: 50 53 59;
+    --color-bg-subtle: 64 68 75;
+    --color-bg-icon: 220 221 222;
+    --color-bg-emphasis: 255 255 255;
+
+    --color-fg-default: 220 221 222;
+    --color-fg-muted: 114 118 125;
+    --color-fg-icon-bg: 64 68 75;
+    --color-fg-icon: 220 221 222;
+    --color-fg-emphasis: 255 255 255;
+
+    --color-caret-default: 220 221 222;
+}
