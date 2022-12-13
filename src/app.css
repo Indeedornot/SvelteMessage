@@ -30,4 +30,9 @@
     --color-fg-emphasis: 255 255 255;
 
     --color-caret-default: 220 221 222;
+
+    --color-border-default: 48 54 61;
+    --color-border-muted: 33 38 45;
+    --color-border-subtle: 240 246 252 / 0.1;
+    --color-border-emphasis: 255 255 255;
 }
