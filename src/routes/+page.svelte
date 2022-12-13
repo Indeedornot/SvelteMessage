@@ -26,10 +26,10 @@
 
 	const setup = async () => {
 		onlineUsers = await getOnlineUsers();
-
 		user = await getName();
+
 		await goOnline(user).then(() => {
-			onlineUsers.push(user);
+			onlineUsers = [...onlineUsers, user];
 		});
 
 		messages = await getMessages();

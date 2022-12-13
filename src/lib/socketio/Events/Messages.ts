@@ -8,7 +8,7 @@ export const addMessageListener = (io: typedServer, socket: typedSocket) => {
 		const messages = await prisma.message.findMany({
 			take: count,
 			orderBy: {
-				timestamp: 'desc'
+				timestamp: 'asc'
 			},
 			include: {
 				sender: true
