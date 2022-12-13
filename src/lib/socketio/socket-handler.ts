@@ -61,6 +61,7 @@ export function injectSocketIO(server: any) {
 			});
 
 			socket.data.user = user;
+			socket.emit('Connected');
 			socket.broadcast.emit('UserOnline', user);
 		});
 

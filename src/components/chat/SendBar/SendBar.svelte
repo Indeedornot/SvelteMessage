@@ -1,6 +1,6 @@
 <script lang="ts">
-	import AddMore from './AddMore.svelte';
-	import SendButton from './SendButton.svelte';
+	import AddMore from '../AddMore.svelte';
+	import SendButton from '../SendButton.svelte';
 
 	export let onSumbit: (text: string) => void;
 

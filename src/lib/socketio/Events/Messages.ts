@@ -3,7 +3,7 @@ import { prisma } from '../../prisma/prisma';
 import type { typedServer, typedSocket } from '../socket-handler';
 
 export const addMessageListener = (io: typedServer, socket: typedSocket) => {
-	socket.on('MessagesRequest', async (count: number) => {
+	socket.on('MessagesHistory', async (count: number) => {
 		// Send the list of X messages to the new user
 		const messages = await prisma.message.findMany({
 			take: count,
@@ -15,7 +15,7 @@ export const addMessageListener = (io: typedServer, socket: typedSocket) => {
 			}
 		});
 
-		socket.emit('MessagesResponse', messages.map(MessageToData));
+		socket.emit('MessagesHistory', messages.map(MessageToData));
 	});
 
 	// Receive incoming messages and broadcast them

@@ -1,123 +1,27 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import { getUserData, setUserData } from '$lib/helpers/DataStore';
-	import type { MessageData, MessageNewData } from '$lib/models/MessageData';
-	import { type UserData, UserStatus } from '$lib/models/UserData';
-	import { io } from '$lib/socketio/socket-client';
-	import { onDestroy, onMount } from 'svelte';
+	import type { MessageData } from '$lib/models/MessageData';
+	import type { UserData } from '$lib/models/UserData';
 
-	import Avatar from './Avatar.svelte';
+	import Header from './Header/Header.svelte';
 	import Message from './Message.svelte';
-	import SendBar from './SendBar.svelte';
+	import SendBar from './SendBar/SendBar.svelte';
 
-	let messages: MessageData[] = [];
-	let user: UserData;
+	export let messages: MessageData[] = [];
 
-	let onlineUsers: Set<UserData> = new Set();
-	let canSend = false;
+	export let onlineUsers: UserData[] = [];
+	export let user: UserData;
 
-	onMount(() => {
-		if (!browser) return;
-		addEventListeners();
-	});
-
-	const addEventListeners = async () => {
-		const onlineUsrs = await getOnlineUsers();
-		onlineUsers = new Set(onlineUsrs);
-
-		user = await getOrListenForName();
-		goOnline();
-		user.status = UserStatus.Online;
-
-		const msgs = await getMessages();
-		messages = msgs;
-
-		onlineUsers.add(user);
-		console.log('onlineUsers', onlineUsers);
-
-		addMessageListener();
-
-		canSend = true;
-	};
-
-	const goOnline = () => {
-		io.emit('Connected', user);
-	};
-
-	const getMessages = () => {
-		return new Promise<MessageData[]>((resolve) => {
-			io.emit('MessagesRequest', 10);
-			io.once('MessagesResponse', (data: MessageData[]) => {
-				resolve(data);
-			});
-		});
-	};
-
-	const getOnlineUsers = (): Promise<UserData[]> => {
-		return new Promise<UserData[]>((resolve) => {
-			io.emit('UsersOnline');
-			io.once('UsersOnline', (data: UserData[]) => {
-				resolve(data);
-			});
-		});
-	};
-
-	const getOrListenForName = (): Promise<UserData> => {
-		return new Promise<UserData>((resolve) => {
-			const userData = getUserData();
-			console.log('userData', userData);
-
-			if (userData) {
-				resolve(userData);
-				return;
-			}
-
-			io.emit('Name');
-			io.once('Name', (newUser: UserData) => {
-				setUserData(newUser);
-				resolve(newUser);
-			});
-		});
-	};
-
-	const addMessageListener = () => {
-		io.on('Message', (message: MessageData) => {
-			console.log('received message from server', message);
-			messages = [...messages, message];
-		});
-	};
-
-	const sendMessage = (text: string) => {
-		if (!canSend) return;
-		const data: MessageNewData = { text: text, sender: user, timestamp: new Date() };
-
-		console.log('sending message to server', data);
-
-		io.emit('Message', data);
-	};
-
-	onDestroy(() => {
-		io.emit('UserOffline');
-	});
-
-	$: console.log('online users', onlineUsers);
+	export let sendMessage: (text: string) => void;
 </script>
 
 <div class="flex h-full w-full flex-none flex-col border-2 border-subtle">
 	<div class="box-border h-[52px] border-b-2 border-emphasis bg-dark px-3.5">
-		<div class="flex h-full w-full flex-none items-center">
-			<Avatar width={32} height={32} src={user?.avatar} />
-			<div class="ml-1 flex flex-col">
-				<span class="text-[14px] font-semibold leading-[18px] text-default">{user?.name}</span>
-				<span class="text-[12px] leading-[16px] text-muted">{user?.id}</span>
-			</div>
-		</div>
+		<Header user={user} />
 	</div>
-	<!-- Header -->
 	<div class="box-border flex min-h-0 flex-grow flex-col bg-default">
 		<div class="messages flex w-full flex-grow flex-col overflow-y-auto">
 			{#each messages as message (message.id)}
-				<Message data={message} />
+				<Message data={message} online={!!onlineUsers.find((x) => x.id === message.sender.id)} />
 			{/each}
 		</div>
 		<div class="mb-2 px-2.5 pb-2">

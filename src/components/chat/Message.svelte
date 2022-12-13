@@ -5,6 +5,8 @@
 	import Avatar from './Avatar.svelte';
 
 	export let data: MessageData;
+
+	export let online: boolean;
 </script>
 
 <div class="flex flex-none flex-row border-b-muted">
@@ -16,7 +18,7 @@
 	</div>
 	<div class="mt-0.5 flex flex-grow flex-col">
 		<div class="flex w-full flex-none justify-between">
-			<span class="text-muted">{data.sender.name}</span>
+			<span class="text-muted">{data.sender.name} {online ? 'Online' : ''}</span>
 			<Time class="text-muted" timestamp={data.timestamp} relative live />
 		</div>
 		<span class="h-full w-full break-words text-default">{data.text}</span>
