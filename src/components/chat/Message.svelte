@@ -11,12 +11,12 @@
 	<div class="pr-2">
 		<div class="h-[40px] w-[40px] overflow-hidden rounded-full bg-subtle">
 			<!-- svelte-ignore a11y-missing-attribute -->
-			<Avatar width={40} height={40} username={data.senderName} />
+			<Avatar width={40} height={40} src={data.sender.avatar} />
 		</div>
 	</div>
 	<div class="mt-0.5 flex flex-grow flex-col">
 		<div class="flex w-full flex-none justify-between">
-			<span class="text-muted">{data.senderName}</span>
+			<span class="text-muted">{data.sender.name}</span>
 			<Time class="text-muted" timestamp={data.timestamp} relative live />
 		</div>
 		<span class="h-full w-full break-words text-default">{data.text}</span>
