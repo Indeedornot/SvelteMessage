@@ -1,56 +1,56 @@
-import { MessageData } from './MessageData';
-import { UserData, UserStatus } from './UserData';
+import type { MessageData } from './MessageData';
+import { type UserData, UserStatus } from './UserData';
 
 export const sampleUsers: { [Key: string]: UserData } = {
-	john: new UserData({
-		id: '1',
+	john: {
+		id: 1,
 		name: 'John Doe',
 		avatar: 'https://randomuser.me/api/portraits/men/21.jpg',
 		status: UserStatus.Busy
-	}),
-	jane: new UserData({
-		id: '2',
+	},
+	jane: {
+		id: 2,
 		name: 'Jane Doe',
 		avatar: 'https://randomuser.me/api/portraits/women/39.jpg',
 		status: UserStatus.Online
-	})
+	}
 };
 
 export const sampleMessages: MessageData[] = [
-	new MessageData({
+	{
 		text: 'Hello, how are you?',
-		id: 'messageId1',
+		id: 1,
 		sender: sampleUsers.john,
-		timestamp: 1670850397000
-	}),
-	new MessageData({
+		timestamp: new Date(1670850397000)
+	},
+	{
 		text: 'I am fine, thank you!',
-		id: 'messageId2',
+		id: 2,
 		sender: sampleUsers.jane,
-		timestamp: 1670853997000
-	}),
-	new MessageData({
+		timestamp: new Date(1670853997000)
+	},
+	{
 		text: 'What about you?',
-		id: 'messageId3',
+		id: 3,
 		sender: sampleUsers.john,
-		timestamp: 1670857597000
-	}),
-	new MessageData({
+		timestamp: new Date(1670857597000)
+	},
+	{
 		text: 'I am fine too!',
-		id: 'messageId4',
+		id: 4,
 		sender: sampleUsers.jane,
-		timestamp: 1670861197000
-	}),
-	new MessageData({
+		timestamp: new Date(1670861197000)
+	},
+	{
 		text: 'Nice to hear that!',
-		id: 'messageId5',
+		id: 5,
 		sender: sampleUsers.john,
-		timestamp: 1670864797000
-	}),
-	new MessageData({
+		timestamp: new Date(1670864797000)
+	},
+	{
 		text: 'Bye!',
-		id: 'messageId6',
+		id: 6,
 		sender: sampleUsers.jane,
-		timestamp: 1670868397000
-	})
+		timestamp: new Date(1670868397000)
+	}
 ];

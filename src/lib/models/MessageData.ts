@@ -1,30 +1,20 @@
-import { nanoid } from 'nanoid';
-
 import type { UserData } from './UserData';
 
-type MessageDataProps = {
-	text: string;
-	sender: UserData;
-	timestamp?: number;
-	id?: string;
-};
-
-export class MessageData {
+export type MessageData = {
 	// receiver: string;
 	// isRead: boolean;
 	// isDeleted: boolean;
 	// isEdited: boolean;
 	// isPinned: boolean;
 
-	id: string;
+	id: number;
 	text: string;
-	timestamp: number;
+	timestamp: Date;
 	sender: UserData;
+};
 
-	constructor({ text, sender, timestamp, id }: MessageDataProps) {
-		this.id = id ?? nanoid();
-		this.text = text;
-		this.timestamp = timestamp ?? Date.now();
-		this.sender = sender;
-	}
-}
+export type MessageNewData = {
+	text: string;
+	timestamp: Date;
+	sender: UserData;
+};

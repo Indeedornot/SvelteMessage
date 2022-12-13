@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { getUserData, setUserData } from '$lib/helpers/DataStore';
-	import { MessageData } from '$lib/models/MessageData';
-	import { sampleMessages } from '$lib/models/SampleData';
-	import { UserData } from '$lib/models/UserData';
+	import type { MessageData, MessageNewData } from '$lib/models/MessageData';
+	import { type UserData, UserStatus } from '$lib/models/UserData';
 	import { io } from '$lib/socketio/socket-client';
 	import { onDestroy, onMount } from 'svelte';
 
@@ -11,10 +10,11 @@
 	import Message from './Message.svelte';
 	import SendBar from './SendBar.svelte';
 
-	let messages: MessageData[] = sampleMessages;
+	let messages: MessageData[] = [];
 	let user: UserData;
 
 	let onlineUsers: Set<UserData> = new Set();
+	let canSend = false;
 
 	onMount(() => {
 		if (!browser) return;
@@ -27,15 +27,30 @@
 
 		user = await getOrListenForName();
 		goOnline();
+		user.status = UserStatus.Online;
+
+		const msgs = await getMessages();
+		messages = msgs;
 
 		onlineUsers.add(user);
 		console.log('onlineUsers', onlineUsers);
 
 		addMessageListener();
+
+		canSend = true;
 	};
 
 	const goOnline = () => {
 		io.emit('Connected', user);
+	};
+
+	const getMessages = () => {
+		return new Promise<MessageData[]>((resolve) => {
+			io.emit('MessagesRequest', 10);
+			io.once('MessagesResponse', (data: MessageData[]) => {
+				resolve(data);
+			});
+		});
 	};
 
 	const getOnlineUsers = (): Promise<UserData[]> => {
@@ -49,32 +64,32 @@
 
 	const getOrListenForName = (): Promise<UserData> => {
 		return new Promise<UserData>((resolve) => {
-			let userData = getUserData();
+			const userData = getUserData();
 			console.log('userData', userData);
 
 			if (userData) {
 				resolve(userData);
+				return;
 			}
 
 			io.emit('Name');
-			io.once('Name', (id: string) => {
-				userData = new UserData({ id: id });
-				setUserData(userData);
-				resolve(userData);
+			io.once('Name', (newUser: UserData) => {
+				setUserData(newUser);
+				resolve(newUser);
 			});
 		});
 	};
 
 	const addMessageListener = () => {
 		io.on('Message', (message: MessageData) => {
-			const data = new MessageData({ ...message });
-			console.log('received message from server', data);
+			console.log('received message from server', message);
+			messages = [...messages, message];
 		});
 	};
 
 	const sendMessage = (text: string) => {
-		const data = new MessageData({ text: text, sender: user });
-		messages = [...messages, data];
+		if (!canSend) return;
+		const data: MessageNewData = { text: text, sender: user, timestamp: new Date() };
 
 		console.log('sending message to server', data);
 
@@ -112,7 +127,7 @@
 </div>
 
 <style>
-	.messages > :global(:not(:last-child)) {
+	.messages > :global(*) {
 		padding-bottom: 12px;
 	}
 
