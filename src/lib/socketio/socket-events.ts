@@ -1,8 +1,13 @@
-export const events = {
-	// Socket.IO events
-	CONNECTION: 'connection',
-	DISCONNECT: 'disconnect',
-	// Custom events
-	MESSAGE: 'message',
-	NAME: 'name'
-};
+import type { MessageData } from '$lib/models/MessageData';
+
+export interface InterServerEvents {}
+
+export interface ServerToClientEvents {
+	MESSAGE: (message: MessageData) => void;
+	NAME: (id: string) => void;
+}
+
+export interface ClientToServerEvents {
+	MESSAGE: (message: MessageData) => void;
+	NAME: () => void;
+}

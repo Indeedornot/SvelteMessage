@@ -2,7 +2,6 @@
 	import { browser } from '$app/environment';
 	import { MessageData, MessageScheme, sampleMessages } from '$lib/models/MessageData';
 	import { io } from '$lib/socketio/socket-client';
-	import { events } from '$lib/socketio/socket-events';
 	import { onMount } from 'svelte';
 
 	import Avatar from './Avatar.svelte';
@@ -15,35 +14,46 @@
 
 	onMount(() => {
 		if (!browser) return;
+		addEventListeners();
+	});
 
-		if (localStorage.getItem('userId') !== null) {
-			userId = localStorage.getItem('userId')!;
-			userName = localStorage.getItem('userName') ?? userId;
-		} else {
-			io.emit(events.NAME);
-			io.on(events.NAME, (name: string) => {
+	const addEventListeners = async () => {
+		await getOrListenForName();
+		addMessageListener();
+	};
+
+	const getOrListenForName = (): Promise<void> => {
+		return new Promise<void>((resolve) => {
+			if (localStorage.getItem('userId') !== null) {
+				userId = localStorage.getItem('userId')!;
+				userName = localStorage.getItem('userName') ?? userId;
+				resolve();
+			}
+
+			io.emit('NAME');
+			io.once('NAME', (name: string) => {
 				userId = name;
 				userName = name;
 				localStorage.setItem('userId', userId);
 				localStorage.setItem('userName', userName);
-
-				//! To be tested
-				io.off(events.NAME);
+				resolve();
 			});
-		}
+		});
+	};
 
-		io.on(events.MESSAGE, (message: MessageData) => {
+	const addMessageListener = () => {
+		io.on('MESSAGE', (message: MessageData) => {
 			const data = new MessageData({ ...message });
 			console.log('received message from server', data);
 			messages = [...messages, data];
 		});
-	});
+	};
 
 	const sendMessage = (text: string) => {
 		const data = new MessageData({ text: text, senderId: userId, senderName: userName });
 		console.log('sending message to server', data);
 
-		io.emit(events.MESSAGE, data);
+		io.emit('MESSAGE', data);
 	};
 </script>
 
