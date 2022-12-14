@@ -68,21 +68,7 @@ export function injectSocketIO(server: any) {
 		addUserListener(io, socket);
 		addMessageListener(io, socket);
 
-		socket.on('disconnect', async () => {
-			//If user didn't send offline event
-			if (socket.data.user !== undefined) {
-				await prisma.user.update({
-					where: {
-						id: socket.data.user.id
-					},
-					data: {
-						status: UserStatus.Offline
-					}
-				});
-
-				socket.broadcast.emit('UserOffline', socket.data.user.id);
-			}
-		});
+		// socket.on('disconnect', async () => {});
 	});
 
 	console.log('SocketIO injected');
