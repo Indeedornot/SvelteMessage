@@ -10,13 +10,20 @@ export type typedServer = Server<ClientToServerEvents, ServerToClientEvents, Int
 export type typedSocket = Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function injectSocketIO(server: any) {
+export async function injectSocketIO(server: any) {
 	const io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(server.httpServer);
 
-	// Socket.IO stuff goes here
-	io.on('connection', (socket: typedSocket) => {
-		console.log('SocketIO connected');
+	await prisma.user.updateMany({
+		where: {
+			status: UserStatus.Online
+		},
+		data: {
+			status: UserStatus.Offline
+		}
+	});
 
+	// Socket.IO stuff goes here
+	io.on('connection', async (socket: typedSocket) => {
 		socket.on('Name', async () => {
 			// Generate a random username and send it to the client to display it
 
@@ -35,15 +42,18 @@ export function injectSocketIO(server: any) {
 
 		socket.on('Connected', async (user) => {
 			// Save the user data
-			const userData = UserScheme.safeParse(user);
-			if (!userData.success) {
-				console.error('Invalid user data', userData.error);
+			console.log('Connected', user);
+
+			const parseData = UserScheme.safeParse(user);
+			if (!parseData.success) {
+				console.error('Invalid user data', parseData.error);
 				return;
 			}
 
+			const userData = parseData.data;
 			const exists = await prisma.user.findUnique({
 				where: {
-					id: userData.data.id
+					id: userData.id
 				}
 			});
 			if (!exists) {
@@ -53,7 +63,7 @@ export function injectSocketIO(server: any) {
 
 			await prisma.user.update({
 				where: {
-					id: userData.data.id
+					id: userData.id
 				},
 				data: {
 					status: UserStatus.Online
@@ -67,8 +77,6 @@ export function injectSocketIO(server: any) {
 
 		addUserListener(io, socket);
 		addMessageListener(io, socket);
-
-		// socket.on('disconnect', async () => {});
 	});
 
 	console.log('SocketIO injected');

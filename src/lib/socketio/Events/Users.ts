@@ -4,6 +4,14 @@ import type { typedServer, typedSocket } from '../socket-handler';
 
 export const addUserListener = (io: typedServer, socket: typedSocket) => {
 	socket.on('UserOffline', async () => {
+		await makeOffline();
+	});
+
+	socket.on('disconnect', async () => {
+		await makeOffline();
+	});
+
+	const makeOffline = async () => {
 		// Remove the user from the list of connected users
 		const user = socket.data.user;
 		if (!user) return;
@@ -19,7 +27,7 @@ export const addUserListener = (io: typedServer, socket: typedSocket) => {
 
 		socket.broadcast.emit('UserOffline', user.id);
 		socket.data.user = undefined;
-	});
+	};
 
 	socket.on('UserOnline', async (user) => {
 		// Add the user to the list of connected users
@@ -51,6 +59,8 @@ export const addUserListener = (io: typedServer, socket: typedSocket) => {
 				status: UserStatus.Online
 			}
 		});
+
+		console.log('UsersOnline', users);
 
 		socket.emit('UsersOnline', users.map(UserToData));
 	});

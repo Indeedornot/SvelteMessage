@@ -2,6 +2,7 @@
 	import DropdownBase from '$components/helpers/Dropdown/DropdownBase.svelte';
 	import { Refresh } from '$components/icons';
 	import { singleLine } from '$lib/helpers/contentEditable';
+	import { maxLength } from '$lib/helpers/contentEditable/maxLength';
 	import { updateName } from '$lib/helpers/socketio/User';
 	import type { UserData } from '$lib/models';
 
@@ -63,6 +64,7 @@
 						contenteditable="true"
 						use:singleLine
 						bind:textContent={newName}
+						use:maxLength={{ maxLength: 32 }}
 					>
 						{user?.name}
 					</span>

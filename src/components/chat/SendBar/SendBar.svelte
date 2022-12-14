@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { MessageConstr } from '$lib/models';
+
 	import AddMore from './AddMore.svelte';
 	import SendButton from './SendButton.svelte';
 
@@ -9,7 +11,9 @@
 	export const sendMessage = () => {
 		console.log('sending message');
 
-		if (inputBar.value.length === 0) return;
+		if (inputBar.value.length < MessageConstr.text.minLength || inputBar.value.length > MessageConstr.text.maxLength) {
+			return;
+		}
 		onSumbit(inputBar.value);
 		inputBar.value = '';
 	};
@@ -26,6 +30,7 @@
 				if (e.key !== 'Enter') return;
 				sendMessage();
 			}}
+			maxlength={MessageConstr.text.maxLength}
 			type="text"
 			class="mt-0 box-border h-full w-full border-0 border-b-2 bg-transparent px-0.5 text-default caret-default focus:ring-0"
 		/>

@@ -1,7 +1,7 @@
 import type { UserData } from '$lib/models';
 import { io } from '$lib/socketio/socket-client';
 
-import { getUserData, setUserData } from '../DataStore';
+import { getUserData, setUserData, updateUserData } from '../DataStore';
 
 export const getOnlineUsers = (): Promise<UserData[]> => {
 	return new Promise<UserData[]>((resolve) => {
@@ -60,7 +60,7 @@ export const getName = (): Promise<UserData> => {
 export const updateName = (name: string): Promise<void> => {
 	return new Promise<void>((resolve) => {
 		io.emit('UserNameChanged', name);
-		setUserData(name);
+		updateUserData({ name: name });
 		io.once('UserNameChanged', () => {
 			resolve();
 		});

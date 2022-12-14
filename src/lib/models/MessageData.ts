@@ -18,3 +18,7 @@ export type MessageNewData = {
 	timestamp: Date;
 	sender: UserData;
 };
+
+export const MessageConstr = {
+	text: { maxLength: 256, minLength: 1 }
+};

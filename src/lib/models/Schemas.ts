@@ -2,7 +2,7 @@ import type { Message, User } from '@prisma/client';
 
 import { z } from 'zod';
 
-import { type MessageData, UserConstr, type UserData, UserStatus } from '.';
+import { MessageConstr, type MessageData, UserConstr, type UserData, UserStatus } from '.';
 
 const idScheme = z.number().int().nonnegative();
 
@@ -23,7 +23,7 @@ export const UserScheme = z.object({
 
 export const MessageScheme = z.object({
 	id: idScheme,
-	text: z.string().min(1),
+	text: z.string().min(MessageConstr.text.minLength).max(MessageConstr.text.maxLength),
 	timestamp: dateSchema,
 	sender: UserScheme
 });
