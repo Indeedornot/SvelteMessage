@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { slide } from '$lib/helpers/slideAnim';
-	import type { MessageData } from '$lib/models/MessageData';
+	import { sendNewMessage } from '$lib/helpers/socketio/Messages';
+	import type { MessageData, MessageNewData } from '$lib/models/MessageData';
 	import type { UserData } from '$lib/models/UserData';
 
 	import Header from './Header/Header.svelte';
@@ -13,15 +14,21 @@
 	export let onlineUsers: UserData[] = [];
 	export let user: UserData;
 
-	export let sendMessage: (text: string) => void;
+	export let canSend: boolean;
 	let showUsers = true;
+
+	const sendMessage = (text: string) => {
+		if (!canSend) return;
+		const data: MessageNewData = { text: text, sender: user, timestamp: new Date() };
+		sendNewMessage(data);
+	};
 
 	$: console.log(user);
 </script>
 
 <div class="flex h-full w-full flex-none flex-col border-2 border-subtle">
-	<div class="box-border h-[52px] border-b-2 border-emphasis bg-dark">
-		<Header bind:showUsers={showUsers} user={user} />
+	<div class="box-border h-[52px] border-b-2 border-muted bg-dark">
+		<Header bind:showUsers={showUsers} bind:user={user} />
 	</div>
 	<div class="flex min-h-0 flex-grow">
 		<div class="box-border flex min-h-0 flex-grow flex-col bg-default">

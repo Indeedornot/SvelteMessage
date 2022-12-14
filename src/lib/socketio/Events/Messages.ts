@@ -15,6 +15,8 @@ export const addMessageListener = (io: typedServer, socket: typedSocket) => {
 			}
 		});
 
+		console.log('messages', messages);
+
 		socket.emit('MessagesHistory', messages.map(MessageToData));
 	});
 

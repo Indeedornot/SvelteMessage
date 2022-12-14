@@ -54,4 +54,21 @@ export const addUserListener = (io: typedServer, socket: typedSocket) => {
 
 		socket.emit('UsersOnline', users.map(UserToData));
 	});
+
+	socket.on('UserNameChanged', async (name) => {
+		// Update the name of the user
+		const user = socket.data.user;
+		if (!user) return;
+
+		await prisma.user.update({
+			where: {
+				id: user.id
+			},
+			data: {
+				name: name
+			}
+		});
+
+		io.emit('UserNameChanged', user.id, name);
+	});
 };

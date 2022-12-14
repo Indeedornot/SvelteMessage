@@ -1,15 +1,9 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import Chat from '$components/chat/Chat.svelte';
-	import {
-		addMessageListener,
-		addUserListener,
-		getMessages,
-		getName,
-		sendNewMessage
-	} from '$lib/helpers/socketio/Messages';
-	import { getOnlineUsers, goOnline } from '$lib/helpers/socketio/User';
-	import type { MessageData, MessageNewData, UserData } from '$lib/models';
+	import { addMessageListener, getMessages } from '$lib/helpers/socketio/Messages';
+	import { addUserListener, getName, getOnlineUsers, goOnline } from '$lib/helpers/socketio/User';
+	import type { MessageData, UserData } from '$lib/models';
 	import { io } from '$lib/socketio/socket-client';
 	import { onDestroy, onMount } from 'svelte';
 
@@ -41,6 +35,13 @@
 			},
 			(userId) => {
 				onlineUsers = onlineUsers.filter((u) => u.id !== userId);
+			},
+			(userId, name) => {
+				const user = onlineUsers.find((u) => u.id === userId);
+				if (!user) return;
+
+				user.name = name;
+				onlineUsers = onlineUsers;
 			}
 		);
 
@@ -51,12 +52,6 @@
 		canSend = true;
 	};
 
-	const sendMessage = (text: string) => {
-		if (!canSend) return;
-		const data: MessageNewData = { text: text, sender: user, timestamp: new Date() };
-		sendNewMessage(data);
-	};
-
 	onDestroy(() => {
 		io.emit('UserOffline');
 	});
@@ -64,6 +59,6 @@
 
 <div class="flex h-full w-full flex-none items-center justify-center">
 	<div class="h-[775px] w-[650px]">
-		<Chat sendMessage={sendMessage} bind:messages={messages} bind:onlineUsers={onlineUsers} bind:user={user} />
+		<Chat bind:messages={messages} bind:onlineUsers={onlineUsers} bind:user={user} canSend={canSend} />
 	</div>
 </div>
