@@ -2,7 +2,7 @@ import type { Message, User } from '@prisma/client';
 
 import { z } from 'zod';
 
-import { type MessageData, type UserData, UserStatus } from '.';
+import { type MessageData, UserConstr, type UserData, UserStatus } from '.';
 
 const idScheme = z.number().int().nonnegative();
 
@@ -10,11 +10,15 @@ const dateSchema = z.preprocess((arg) => {
 	if (typeof arg == 'string' || arg instanceof Date) return new Date(arg);
 }, z.date());
 
+const statusSchema = z.nativeEnum(UserStatus);
+
+const urlSchema = z.string().url();
+
 export const UserScheme = z.object({
 	id: idScheme,
-	name: z.string(),
-	avatar: z.string(),
-	status: z.nativeEnum(UserStatus)
+	name: z.string().min(UserConstr.name.minLength).max(UserConstr.name.maxLength),
+	avatar: urlSchema,
+	status: statusSchema
 });
 
 export const MessageScheme = z.object({

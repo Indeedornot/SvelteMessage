@@ -11,3 +11,7 @@ export enum UserStatus {
 	Busy = 'busy',
 	Away = 'away'
 }
+
+export const UserConstr = {
+	name: { maxLength: 32, minLength: 1 }
+};
