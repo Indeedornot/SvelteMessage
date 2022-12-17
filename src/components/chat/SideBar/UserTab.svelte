@@ -6,7 +6,7 @@
 	export let user: UserData;
 </script>
 
-<div class="px-1.5">
+<div class="w-full px-1.5">
 	<div class="flex h-[46px] w-full flex-none flex-row items-center rounded-md pl-1 hover:bg-subtle">
 		<Avatar src={user?.avatar} width={32} height={32} />
 		<div class="flex flex-col justify-center py-1 pl-2 text-default">

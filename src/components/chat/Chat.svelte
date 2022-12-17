@@ -27,23 +27,23 @@
 </script>
 
 <div class="flex h-full w-full flex-none flex-col border-2 border-subtle">
-	<div class="box-border h-[52px] border-b-2 border-muted bg-dark">
+	<div class="box-border flex h-[52px] w-full flex-none border-b-2 border-muted bg-dark">
 		<Header bind:showUsers={showUsers} bind:user={user} />
 	</div>
-	<div class="flex min-h-0 flex-grow">
-		<div class="box-border flex min-h-0 flex-grow flex-col bg-default">
-			<div class="messages flex w-full flex-grow flex-col overflow-y-auto">
+	<div class="flex min-h-0 w-full flex-grow flex-row">
+		<div class="flex min-w-0 flex-grow flex-col bg-default">
+			<div class="messages flex min-h-0 w-full flex-grow flex-col overflow-y-auto">
 				{#each messages as message (message.id)}
 					<Message data={message} online={!!onlineUsers.find((x) => x.id === message.sender.id)} />
 				{/each}
 			</div>
-			<div class="mb-2 px-2.5 pb-2">
+			<div class="px-2.5 pb-4">
 				<SendBar onSumbit={sendMessage} />
 			</div>
 		</div>
 		{#if showUsers}
 			<div
-				class="users right-0 h-full w-4/12 bg-dark"
+				class="users flex h-full w-[200px] flex-none bg-dark"
 				in:slide={{ duration: 150, axis: 'z' }}
 				out:slide={{ duration: 150, axis: 'z' }}
 			>

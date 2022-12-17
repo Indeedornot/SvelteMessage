@@ -2,8 +2,10 @@ Todo:
   ☐ Message virtualization (tinylist?)
   ☐ Profile picture change @started(22-12-13 20:32)
   ☐ Message Editting (Laid grounds with MessageNewData)
-  ☐ Add Limit to Message text lenght
+  ☐ Stop currUserTab from growing on name change
+  ☐ Add channels 
 
 Done:
+  ✔ Add Limit to Message text lenght @done(22-12-17 12:19)
   ✔ Styled Scrollbar @done(22-12-13 18:18)
   ✔ Username change @started(22-12-13 20:32) @done(22-12-14 17:46) @lasted(21h14m43s)
