@@ -31,21 +31,17 @@
 		<div class="flex flex-grow px-2">
 			<textarea
 				bind:this={inputBar}
-				on:keydown={(e) => {
+				on:keydown|capture={(e) => {
 					if (e.key !== 'Enter' || e.shiftKey) return;
 					e.preventDefault();
 					sendMessage();
-				}}
-				on:input={() => {
-					const scrollHeight = inputBar.scrollHeight;
-					inputBar.style.height = scrollHeight + 'px';
 				}}
 				class="box-border
 				max-h-[100px] w-full resize-none
 				border-0 bg-transparent py-0
 				px-0.5 text-default caret-default outline-none focus:ring-0"
 				maxLength={MessageConstr.text.maxLength}
-				use:autoResize
+				use:autoResize={inputBar?.value}
 				rows={1}
 			/>
 			<!-- use:maxRows={{ maxRows: 5, minRows: 1, start: 1 }} -->
