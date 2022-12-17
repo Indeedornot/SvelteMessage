@@ -36,11 +36,14 @@
 			(userId) => {
 				onlineUsers = onlineUsers.filter((u) => u.id !== userId);
 			},
-			(userId, name) => {
-				const user = onlineUsers.find((u) => u.id === userId);
+			(userId, data) => {
+				let user = onlineUsers.find((u) => u.id === userId);
 				if (!user) return;
 
-				user.name = name;
+				user = {
+					...user,
+					...data
+				};
 				onlineUsers = onlineUsers;
 			}
 		);
@@ -55,6 +58,17 @@
 	onDestroy(() => {
 		io.emit('UserOffline');
 	});
+
+	//update user in onlineUsers
+
+	$: {
+		const userIndex = onlineUsers.findIndex((u) => u.id === user.id);
+		if (userIndex !== -1) onlineUsers[userIndex] = user;
+
+		messages.map((m) => {
+			if (m.sender.id === user.id) m.sender = user;
+		});
+	}
 </script>
 
 <div class="flex h-full w-full flex-none items-center justify-center">

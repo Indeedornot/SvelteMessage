@@ -1,35 +1,51 @@
 <script lang="ts">
 	import DropdownBase from '$components/helpers/Dropdown/DropdownBase.svelte';
 	import { Refresh } from '$components/icons';
+	import { generateRandomAvatar } from '$lib/helpers/RandomAvatar';
 	import { singleLine } from '$lib/helpers/contentEditable';
 	import { maxLength } from '$lib/helpers/contentEditable/maxLength';
-	import { updateName } from '$lib/helpers/socketio/User';
+	import { updateUser } from '$lib/helpers/socketio/User';
 	import { UserConstr, type UserData } from '$lib/models';
 
 	import Avatar from '../Avatar.svelte';
 
 	export let user: UserData;
 	export let canShow = true;
-	export let showTooltip = false;
+	export let showTooltip = true;
 
 	let newName: string;
 	$: user?.name, resetName();
+
+	let newAvatar: string;
+	$: user?.avatar, resetAvatar();
 
 	const resetName = () => {
 		newName = user?.name;
 	};
 
-	let updating = false;
-	const updateUsername = () => {
-		if (updating) return;
+	const resetAvatar = () => {
+		newAvatar = user?.avatar;
+	};
 
-		updating = true;
-		user.name = newName;
+	let updatingData = false;
+	const updateUsername = () => {
+		if (updatingData) return;
+		if ((newAvatar === user.avatar && newName === user.name) || (!newName && !newAvatar)) return;
+
+		updatingData = true;
+
+		if (newName) user.name = newName;
+		if (newAvatar) user.avatar = newAvatar;
+
 		console.log('updating name');
 
-		updateName(newName).then(() => {
-			updating = false;
+		updateUser({ name: newName, avatar: newAvatar }).then(() => {
+			updatingData = false;
 		});
+	};
+
+	const generateAvatar = () => {
+		newAvatar = generateRandomAvatar();
 	};
 </script>
 
@@ -57,7 +73,10 @@
 	<div slot="dropdown" class="flex flex-none items-center rounded-md border-2 border-subtle bg-overlay">
 		<div class="m-2 rounded-md bg-dark p-2">
 			<div class="flex flex-row items-center">
-				<Avatar width={32} height={32} src={user?.avatar} />
+				<button class="group relative" on:click={generateAvatar}>
+					<Avatar width={32} height={32} src={newAvatar ?? user?.avatar} />
+					<span class="absolute left-0 top-0 h-full w-full group-hover:bg-default/50 group-active:bg-dark/75" />
+				</button>
 				<div class="ml-1.5 flex flex-col gap-1 child:pr-1 child:pl-0.5">
 					<span
 						class="text-[14px] font-semibold leading-[18px] text-default"

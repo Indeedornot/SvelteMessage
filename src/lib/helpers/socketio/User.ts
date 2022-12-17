@@ -24,7 +24,7 @@ export const goOnline = (user: UserData): Promise<void> => {
 export const addUserListener = (
 	onOnline: (data: UserData) => void,
 	onOffline: (userId: number) => void,
-	onNameChanged: (userId: number, name: string) => void
+	onUserChanged: (userId: number, data: Partial<UserData>) => void
 ) => {
 	io.on('UserOnline', (data: UserData) => {
 		onOnline(data);
@@ -34,8 +34,8 @@ export const addUserListener = (
 		onOffline(userId);
 	});
 
-	io.on('UserNameChanged', (userId: number, name: string) => {
-		onNameChanged(userId, name);
+	io.on('UserChanged', (userId: number, data: Partial<UserData>) => {
+		onUserChanged(userId, data);
 	});
 };
 
@@ -57,11 +57,11 @@ export const getName = (): Promise<UserData> => {
 	});
 };
 
-export const updateName = (name: string): Promise<void> => {
+export const updateUser = (data: Partial<UserData>): Promise<void> => {
 	return new Promise<void>((resolve) => {
-		io.emit('UserNameChanged', name);
-		updateUserData({ name: name });
-		io.once('UserNameChanged', () => {
+		io.emit('UserChanged', data);
+		updateUserData(data);
+		io.once('UserChanged', () => {
 			resolve();
 		});
 	});

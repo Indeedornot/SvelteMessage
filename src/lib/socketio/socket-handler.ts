@@ -1,6 +1,7 @@
 //Needs to use relative imports due to being processed in vite.config.js
 import { Server, Socket } from 'socket.io';
 
+import { generateRandomAvatar } from '../helpers/RandomAvatar';
 import { UserScheme, UserStatus, UserToData } from '../models';
 import { prisma } from '../prisma/prisma';
 import { addMessageListener, addUserListener } from './Events';
@@ -30,7 +31,7 @@ export async function injectSocketIO(server: any) {
 			const user = await prisma.user.create({
 				data: {
 					name: 'New User',
-					avatar: `https://icotar.com/avatar/${Math.random().toString(36).substring(7)}`,
+					avatar: generateRandomAvatar(),
 					status: UserStatus.Offline
 				}
 			});
