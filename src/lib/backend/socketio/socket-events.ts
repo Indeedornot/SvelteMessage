@@ -1,6 +1,6 @@
-import type { UserData } from '../models';
-import type { MessageCTSEvents, MessageSTCEvents } from './Events/MessageEvents';
-import type { UserCTSEvents, UserSTCEvents } from './Events/UserEvents';
+import type { UserData } from '../../models';
+import type { MessageCTSEvents, MessageSTCEvents } from './events/MessageEvents';
+import type { UserCTSEvents, UserSTCEvents } from './events/UserEvents';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface InterServerEvents {}

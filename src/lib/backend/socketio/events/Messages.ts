@@ -1,4 +1,4 @@
-import { MessageNewScheme, MessageToData } from '../../models';
+import { MessageNewScheme, MessageToData } from '../../../models';
 import { prisma } from '../../prisma/prisma';
 import type { typedServer, typedSocket } from '../socket-handler';
 

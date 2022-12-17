@@ -1,5 +1,5 @@
+import { io } from '$lib/backend/socketio/socket-client';
 import type { MessageData, MessageNewData } from '$lib/models';
-import { io } from '$lib/socketio/socket-client';
 
 export const getMessages = () => {
 	return new Promise<MessageData[]>((resolve) => {

@@ -1,4 +1,4 @@
-import { UserScheme, UserStatus, UserToData } from '../../models';
+import { UserScheme, UserStatus, UserToData } from '../../../models';
 import { prisma } from '../../prisma/prisma';
 import type { typedServer, typedSocket } from '../socket-handler';
 

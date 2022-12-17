@@ -1,4 +1,4 @@
-import type { MessageData, MessageNewData } from '../../models';
+import type { MessageData, MessageNewData } from '../../../models';
 
 export interface MessageSTCEvents {
 	MessagesHistory: (messages: MessageData[]) => void; //Sends previous messages to a new connected user

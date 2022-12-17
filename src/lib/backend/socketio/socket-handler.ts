@@ -1,10 +1,10 @@
 //Needs to use relative imports due to being processed in vite.config.js
 import { Server, Socket } from 'socket.io';
 
-import { generateRandomAvatar } from '../helpers/RandomAvatar';
-import { UserScheme, UserStatus, UserToData } from '../models';
+import { generateRandomAvatar } from '../../helpers/RandomAvatar';
+import { UserScheme, UserStatus, UserToData } from '../../models';
 import { prisma } from '../prisma/prisma';
-import { addMessageListener, addUserListener } from './Events';
+import { addMessageListener, addUserListener } from './events';
 import type { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from './socket-events';
 
 export type typedServer = Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;

@@ -2,9 +2,9 @@
 	import { browser } from '$app/environment';
 	import Chat from '$components/chat/Chat.svelte';
 	import { addMessageListener, getMessages } from '$lib/helpers/socketio/Messages';
-	import { addUserListener, getName, getOnlineUsers, goOnline } from '$lib/helpers/socketio/User';
+	import { addUserListener, getUser, getOnlineUsers, goOnline } from '$lib/helpers/socketio/User';
 	import type { MessageData, UserData } from '$lib/models';
-	import { io } from '$lib/socketio/socket-client';
+	import { io } from '$lib/backend/socketio/socket-client';
 	import { onDestroy, onMount } from 'svelte';
 
 	let messages: MessageData[] = [];
@@ -20,7 +20,7 @@
 
 	const setup = async () => {
 		onlineUsers = await getOnlineUsers();
-		user = await getName();
+		user = await getUser();
 
 		await goOnline(user).then(() => {
 			onlineUsers = [...onlineUsers, user];

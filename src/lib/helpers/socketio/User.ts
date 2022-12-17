@@ -1,5 +1,5 @@
+import { io } from '$lib/backend/socketio/socket-client';
 import type { UserData } from '$lib/models';
-import { io } from '$lib/socketio/socket-client';
 
 import { getUserData, setUserData, updateUserData } from '../DataStore';
 
@@ -39,7 +39,7 @@ export const addUserListener = (
 	});
 };
 
-export const getName = (): Promise<UserData> => {
+export const getUser = (): Promise<UserData> => {
 	return new Promise<UserData>((resolve) => {
 		const userData = getUserData();
 		console.log('userData', userData);

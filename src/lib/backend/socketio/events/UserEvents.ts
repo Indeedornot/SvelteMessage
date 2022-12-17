@@ -1,4 +1,4 @@
-import type { UserData } from '../../models';
+import type { UserData } from '../../../models';
 
 export interface UserSTCEvents {
 	UserOnline: (user: UserData) => void; //Notifies of a user going online (saves data)
