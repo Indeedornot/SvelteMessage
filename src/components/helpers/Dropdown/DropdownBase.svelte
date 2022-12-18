@@ -2,11 +2,14 @@
 	import { clickOutside } from '$lib/helpers/clickOutside';
 
 	import { type DropdownProps, createDropdown } from './dropdownCtor';
+	import { dropdownHover } from './dropdownHover';
 
 	export let options: DropdownProps;
 	export let canShow: boolean = true;
 	export let showTooltip: boolean;
 	export let zIndex: number = 0;
+	export let className = '';
+	export let hover = false;
 	$: if (!canShow && showTooltip) {
 		showTooltip = false;
 	}
@@ -15,9 +18,24 @@
 	const { popperRef, popperContent, extraOpts } = createDropdown(options);
 </script>
 
-<div bind:this={buttonRef} use:popperRef>
-	<slot name="button" />
-</div>
+{#if !hover}
+	<div bind:this={buttonRef} class={className} use:popperRef>
+		<slot name="button" />
+	</div>
+{:else}
+	<div
+		bind:this={buttonRef}
+		class={className}
+		use:popperRef
+		use:dropdownHover
+		on:dropdownHover={(e) => {
+			showTooltip = e.detail;
+		}}
+	>
+		<slot name="button" />
+	</div>
+{/if}
+
 {#if showTooltip}
 	<div
 		use:popperContent={extraOpts}

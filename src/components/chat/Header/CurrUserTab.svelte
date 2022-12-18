@@ -1,32 +1,27 @@
 <script lang="ts">
 	import DropdownBase from '$components/helpers/Dropdown/DropdownBase.svelte';
-	import { Refresh } from '$components/icons';
-	import { generateRandomAvatar } from '$lib/helpers/RandomAvatar';
-	import { maxLength, singleLine } from '$lib/helpers/contentEditable';
-	import { UserConstr, type UserUpdateData } from '$lib/models';
+	import type { UserUpdateData } from '$lib/models';
 	import { UserStore } from '$lib/stores';
 
 	import Avatar from '../Avatar.svelte';
+	import DisplayChange from './DisplayChange.svelte';
+	import StatusChange from './StatusChange.svelte';
+	import SumbitChange from './SumbitChange.svelte';
 
 	export let canShow = true;
 	export let showTooltip = true;
 
-	let newName: string;
-	$: $UserStore?.name, resetName();
+	let newName: string = $UserStore?.name ?? '';
+	let newAvatar: string = $UserStore?.avatar ?? '';
 
-	let newAvatar: string;
-	$: $UserStore?.avatar, resetAvatar();
-
-	const resetName = () => {
+	$: $UserStore, resetDisplay();
+	const resetDisplay = () => {
 		newName = $UserStore?.name ?? '';
-	};
-
-	const resetAvatar = () => {
 		newAvatar = $UserStore?.avatar ?? '';
 	};
 
 	let updatingData = false;
-	const updateUsername = async () => {
+	const updateDisplay = async () => {
 		if (updatingData) return;
 		updatingData = true;
 
@@ -41,10 +36,6 @@
 
 		await UserStore.updateUser(data);
 		updatingData = false;
-	};
-
-	const generateAvatar = () => {
-		newAvatar = generateRandomAvatar();
 	};
 </script>
 
@@ -64,7 +55,7 @@
 		on:click={() => (showTooltip = !showTooltip)}
 	>
 		<div class="flex w-[32px] flex-none">
-			<Avatar width={32} height={32} src={$UserStore?.avatar} />
+			<Avatar width={32} height={32} src={$UserStore?.avatar} status={$UserStore?.status} />
 		</div>
 		<div class="ml-1.5 flex min-w-0 flex-grow flex-col items-start">
 			<span class="w-full truncate text-left text-[14px] font-semibold leading-[18px] text-default"
@@ -75,34 +66,12 @@
 	</button>
 	<div slot="dropdown" class="flex flex-none items-center rounded-md border-2 border-subtle bg-overlay">
 		<div class="m-2 w-[166px] rounded-md bg-dark p-2">
-			<div class="flex flex-row items-center">
-				<button class="group relative" on:click={generateAvatar}>
-					<Avatar width={32} height={32} src={newAvatar ?? $UserStore?.avatar} />
-					<span class="absolute left-0 top-0 h-full w-full group-hover:bg-default/50 group-active:bg-dark/75" />
-				</button>
-				<div class="ml-1.5 flex w-full flex-col gap-1 child:pr-1 child:pl-0.5">
-					<span
-						class="w-full break-all text-[14px] font-semibold leading-[18px] text-default outline-none"
-						contenteditable="true"
-						use:singleLine
-						bind:textContent={newName}
-						use:maxLength={{ maxLength: UserConstr.name.maxLength }}
-					>
-						{$UserStore?.name}
-					</span>
-					<span class="text-[12px] leading-[16px] text-muted">{$UserStore?.id}</span>
-				</div>
+			<div class="flex flex-col items-center">
+				<DisplayChange bind:newAvatar={newAvatar} bind:newName={newName} />
+				<StatusChange />
 			</div>
 			<div class="w-full pt-1.5">
-				<div class="flex flex-grow gap-1">
-					<button class="rounded-sm bg-default p-1 text-muted" on:click={resetName}><Refresh size={12} /></button>
-					<button
-						class="flex flex-grow justify-center rounded-sm bg-accent px-2 text-[12px] text-accent"
-						on:click={updateUsername}
-					>
-						Sumbit
-					</button>
-				</div>
+				<SumbitChange resetDisplay={resetDisplay} updateDisplay={updateDisplay} />
 			</div>
 		</div>
 	</div>

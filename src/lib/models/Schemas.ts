@@ -1,8 +1,6 @@
-import type { Message } from '@prisma/client';
-
 import { z } from 'zod';
 
-import { type MessageApiData, MessageConstr } from './MessageData';
+import { MessageConstr } from './MessageData';
 import { UserConstr, UserStatus } from './UserData';
 
 export const idScheme = z.number().int().nonnegative();

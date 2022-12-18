@@ -2,17 +2,6 @@
 module.exports = {
 	content: ['./src/**/*.{html,js,svelte,ts}'],
 	theme: {
-		/*
-			--color-bg-dark: 32 34 37;
-			--color-bg-default: 54 57 63;
-			--color-bg-hover: 50 53 59;
-			--color-bg-subtle: 64 68 75;
-			--color-fg-default: 220 221 222;
-			--color-fg-muted: 114 118 125;
-			--color-bg-icon: 220 221 222;
-			--color-fg-icon: 64 68 75;
-			--color-caret-default: 220 221 222; 
-		*/
 		extend: {
 			backgroundColor: {
 				dark: 'rgb(var(--color-bg-dark) / <alpha-value>)',
@@ -22,7 +11,11 @@ module.exports = {
 				icon: 'rgb(var(--color-bg-icon) / <alpha-value>)',
 				emphasis: 'rgb(var(--color-bg-emphasis) / <alpha-value>)',
 				overlay: 'rgb(var(--color-bg-overlay) / <alpha-value>)',
-				accent: 'rgb(var(--color-bg-accent) / <alpha-value>)'
+				accent: 'rgb(var(--color-bg-accent) / <alpha-value>)',
+				online: 'rgb(var(--color-bg-online) / <alpha-value>)',
+				offline: 'rgb(var(--color-bg-offline) / <alpha-value>)',
+				busy: 'rgb(var(--color-bg-busy) / <alpha-value>)',
+				away: 'rgb(var(--color-bg-away) / <alpha-value>)'
 			}
 		},
 		screens: {
@@ -42,15 +35,6 @@ module.exports = {
 		caretColor: {
 			default: 'rgb(var(--color-caret-default) / <alpha-value>)'
 		},
-		// boxShadow: {
-		// 	default: 'var(--color-shadow-default)',
-		// 	medium: 'var(--color-shadow-medium)',
-		// 	large: 'var(--color-shadow-large)',
-		// 	'extra-large': 'var(--color-shadow-extra-large)',
-		// 	'outline-default': 'var(--color-shadow-outline-default)',
-		// 	'outline-muted': 'var(--color-shadow-outline-muted)',
-		// 	ambient: 'var(--color-shadow-ambient)'
-		// },
 		borderColor: {
 			default: 'rgb(var(--color-border-default) / <alpha-value>)',
 			muted: 'rgb(var(--color-border-muted) / <alpha-value>)',
@@ -64,10 +48,10 @@ module.exports = {
 			'extra-large': 'var(--color-shadow-extra-large)',
 			'outline-default': 'var(--color-shadow-outline-default)',
 			'outline-muted': 'var(--color-shadow-outline-muted)',
-			// --color-shadow-ambient
 			ambient: 'var(--color-shadow-ambient)'
 		}
 	},
+	safelist: ['bg-online', 'bg-offline', 'bg-busy', 'bg-away'],
 	plugins: [
 		function ({ addVariant }) {
 			addVariant('child', '& > *');

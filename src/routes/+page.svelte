@@ -15,19 +15,19 @@
 	});
 
 	const setup = async () => {
-		await OnlineUsers.fetchUsers();
+		await Promise.all([
+			OnlineUsers.fetchUsers(),
+			UserStore.fetchUser().then(async (u) => {
+				await goOnline(u);
+			})
+		]);
 
-		await UserStore.fetchUser().then(async (u) => {
-			await goOnline(u);
-		});
-
-		await MessageCache.fetchMessages();
-
-		//add listeners
 		addUserListener();
-
 		addMessageListener();
-		canSend = true;
+
+		MessageCache.fetchMessages().then(() => {
+			canSend = true;
+		});
 	};
 
 	onDestroy(() => {

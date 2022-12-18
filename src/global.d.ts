@@ -2,5 +2,6 @@
 declare namespace svelte.JSX {
 	interface HTMLAttributes<T> {
 		onclickOutside?: () => void;
+		ondropdownHover?: (event: CustomEvent<boolean>) => void;
 	}
 }
