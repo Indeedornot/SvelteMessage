@@ -1,40 +1,33 @@
 <script lang="ts">
 	import { slide } from '$lib/helpers/slideAnim';
 	import { sendNewMessage } from '$lib/helpers/socketio/Messages';
-	import type { MessageData, MessageNewData } from '$lib/models/MessageData';
-	import type { UserData } from '$lib/models/UserData';
+	import type { MessageCreateApiData } from '$lib/models/MessageData';
+	import { MessageCache, OnlineUsers, UserStore } from '$lib/stores';
 
 	import Header from './Header/Header.svelte';
 	import Message from './Message.svelte';
 	import SendBar from './SendBar/SendBar.svelte';
 	import UserTab from './SideBar/UserTab.svelte';
 
-	export let messages: MessageData[] = [];
-
-	export let onlineUsers: UserData[] = [];
-	export let user: UserData;
-
 	export let canSend: boolean;
 	let showUsers = true;
 
 	const sendMessage = (text: string) => {
-		if (!canSend) return;
-		const data: MessageNewData = { text: text, sender: user, timestamp: new Date() };
+		if (!canSend || !$UserStore) return;
+		const data: MessageCreateApiData = { text: text, senderId: $UserStore.id, timestamp: new Date() };
 		sendNewMessage(data);
 	};
-
-	$: console.log(user);
 </script>
 
 <div class="flex h-full w-full flex-none flex-col border-2 border-subtle">
 	<div class="box-border flex h-[52px] w-full flex-none border-b-2 border-muted bg-dark">
-		<Header bind:showUsers={showUsers} bind:user={user} />
+		<Header bind:showUsers={showUsers} />
 	</div>
 	<div class="flex min-h-0 w-full flex-grow flex-row">
 		<div class="flex min-w-0 flex-grow flex-col bg-default">
 			<div class="messages flex min-h-0 w-full flex-grow flex-col overflow-y-auto">
-				{#each messages as message (message.id)}
-					<Message data={message} online={!!onlineUsers.find((x) => x.id === message.sender.id)} />
+				{#each $MessageCache as message (message.id)}
+					<Message data={message} online={!!$OnlineUsers.find((x) => x.id === message.sender.id)} />
 				{/each}
 			</div>
 			<div class="px-2.5 pb-4">
@@ -43,11 +36,12 @@
 		</div>
 		{#if showUsers}
 			<div
-				class="users flex h-full w-[200px] flex-none bg-dark"
+				class="users flex h-full w-[200px] flex-none flex-col bg-dark"
 				in:slide={{ duration: 150, axis: 'z' }}
 				out:slide={{ duration: 150, axis: 'z' }}
 			>
-				{#each onlineUsers as onlineUser (onlineUser.id)}
+				<UserTab user={$UserStore} />
+				{#each $OnlineUsers as onlineUser (onlineUser.id)}
 					<UserTab user={onlineUser} />
 				{/each}
 			</div>{/if}

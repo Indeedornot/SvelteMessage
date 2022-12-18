@@ -5,6 +5,8 @@ export type UserData = {
 	status: UserStatus;
 };
 
+export type UserUpdateData = Omit<Partial<UserData>, 'id'>;
+
 export enum UserStatus {
 	Online = 'online',
 	Offline = 'offline',

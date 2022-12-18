@@ -1,15 +1,12 @@
 import { io } from '$lib/backend/socketio/socket-client';
-import type { UserData } from '$lib/models';
+import { trpc } from '$lib/backend/trpc/client';
+import { type UserData, UserStatus, type UserUpdateData } from '$lib/models';
+import { OnlineUsers, UsersCache } from '$lib/stores';
 
 import { getUserData, setUserData, updateUserData } from '../DataStore';
 
-export const getOnlineUsers = (): Promise<UserData[]> => {
-	return new Promise<UserData[]>((resolve) => {
-		io.emit('UsersOnline');
-		io.once('UsersOnline', (data: UserData[]) => {
-			resolve(data);
-		});
-	});
+export const getOnlineUsers = async (): Promise<UserData[]> => {
+	return trpc().user.getByStatus.query(UserStatus.Online);
 };
 
 export const goOnline = (user: UserData): Promise<void> => {
@@ -21,43 +18,39 @@ export const goOnline = (user: UserData): Promise<void> => {
 	});
 };
 
-export const addUserListener = (
-	onOnline: (data: UserData) => void,
-	onOffline: (userId: number) => void,
-	onUserChanged: (userId: number, data: Partial<UserData>) => void
-) => {
+export const addUserListener = () => {
 	io.on('UserOnline', (data: UserData) => {
-		onOnline(data);
+		OnlineUsers.addUser(data);
+		UsersCache.addOrUpdateUser(data);
 	});
 
 	io.on('UserOffline', (userId: number) => {
-		onOffline(userId);
+		OnlineUsers.removeUser(userId);
 	});
 
 	io.on('UserChanged', (userId: number, data: Partial<UserData>) => {
-		onUserChanged(userId, data);
+		OnlineUsers.updateUser(userId, data);
+		UsersCache.updateUser(userId, data);
 	});
 };
 
-export const getUser = (): Promise<UserData> => {
-	return new Promise<UserData>((resolve) => {
-		const userData = getUserData();
-		console.log('userData', userData);
+export const getUser = async (): Promise<UserData> => {
+	const userData = getUserData();
+	console.log('userData', userData);
 
-		if (userData) {
-			resolve(userData);
-			return;
-		}
+	if (userData) {
+		return userData;
+	}
 
-		io.emit('Name');
-		io.once('Name', (newUser: UserData) => {
-			setUserData(newUser);
-			resolve(newUser);
+	return await trpc()
+		.user.create.query()
+		.then((data) => {
+			setUserData(data);
+			return data;
 		});
-	});
 };
 
-export const updateUser = (data: Partial<UserData>): Promise<void> => {
+export const updateUser = (data: UserUpdateData): Promise<void> => {
 	return new Promise<void>((resolve) => {
 		io.emit('UserChanged', data);
 		updateUserData(data);
@@ -65,4 +58,8 @@ export const updateUser = (data: Partial<UserData>): Promise<void> => {
 			resolve();
 		});
 	});
+};
+
+export const getUsers = async (): Promise<UserData[]> => {
+	return await trpc().user.getAll.query();
 };

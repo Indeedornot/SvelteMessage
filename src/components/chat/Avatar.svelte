@@ -2,7 +2,7 @@
 	export let width: number;
 	export let height: number;
 
-	export let src: string;
+	export let src: string | undefined;
 	export let rounded = true;
 </script>
 

@@ -1,8 +1,7 @@
 //Needs to use relative imports due to being processed in vite.config.js
 import { Server, Socket } from 'socket.io';
 
-import { generateRandomAvatar } from '../../helpers/RandomAvatar';
-import { UserScheme, UserStatus, UserToData } from '../../models';
+import { UserScheme, UserStatus } from '../../models';
 import { prisma } from '../prisma/prisma';
 import { addMessageListener, addUserListener } from './events';
 import type { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from './socket-events';
@@ -25,22 +24,6 @@ export async function injectSocketIO(server: any) {
 
 	// Socket.IO stuff goes here
 	io.on('connection', async (socket: typedSocket) => {
-		socket.on('Name', async () => {
-			// Generate a random username and send it to the client to display it
-
-			const user = await prisma.user.create({
-				data: {
-					name: 'New User',
-					avatar: generateRandomAvatar(),
-					status: UserStatus.Offline
-				}
-			});
-
-			const userData = UserToData(user);
-
-			socket.emit('Name', userData);
-		});
-
 		socket.on('Connected', async (user) => {
 			// Save the user data
 			console.log('Connected', user);

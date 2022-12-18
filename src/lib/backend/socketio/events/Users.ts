@@ -1,4 +1,4 @@
-import { UserScheme, UserStatus, UserToData } from '../../../models';
+import { UserScheme, UserStatus } from '../../../models';
 import { prisma } from '../../prisma/prisma';
 import type { typedServer, typedSocket } from '../socket-handler';
 
@@ -50,19 +50,6 @@ export const addUserListener = (io: typedServer, socket: typedSocket) => {
 
 		socket.data.user = user;
 		socket.broadcast.emit('UserOnline', userData);
-	});
-
-	socket.on('UsersOnline', async () => {
-		// Send the list of connected users to the new user
-		const users = await prisma.user.findMany({
-			where: {
-				status: UserStatus.Online
-			}
-		});
-
-		console.log('UsersOnline', users);
-
-		socket.emit('UsersOnline', users.map(UserToData));
 	});
 
 	socket.on('UserChanged', async (data) => {

@@ -10,11 +10,9 @@ export interface SocketData {
 }
 
 export interface ServerToClientEvents extends UserSTCEvents, MessageSTCEvents {
-	Name: (user: UserData) => void; //Sends new name to client
 	Connected: () => void; //Acknowledges a new connection
 }
 
 export interface ClientToServerEvents extends UserCTSEvents, MessageCTSEvents {
-	Name: () => void; //Requests new user data
 	Connected: (user: UserData) => void; //Notifies of a new connection
 }

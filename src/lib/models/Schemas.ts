@@ -1,18 +1,20 @@
-import type { Message, User } from '@prisma/client';
+import type { Message } from '@prisma/client';
 
 import { z } from 'zod';
 
-import { MessageConstr, type MessageData, UserConstr, type UserData, UserStatus } from '.';
+import { type MessageApiData, MessageConstr } from './MessageData';
+import { UserConstr, UserStatus } from './UserData';
 
-const idScheme = z.number().int().nonnegative();
+export const idScheme = z.number().int().nonnegative();
 
-const dateSchema = z.preprocess((arg) => {
+export const dateSchema = z.preprocess((arg) => {
 	if (typeof arg == 'string' || arg instanceof Date) return new Date(arg);
 }, z.date());
 
-const statusSchema = z.nativeEnum(UserStatus);
+export const statusSchema = z.nativeEnum(UserStatus);
 
 const urlSchema = z.string().url();
+export const avatarSchema = urlSchema;
 
 export const UserScheme = z.object({
 	id: idScheme,
@@ -28,18 +30,8 @@ export const MessageScheme = z.object({
 	sender: UserScheme
 });
 
-export const MessageNewScheme = MessageScheme.omit({ id: true });
-
-export const UserToData = (user: User): UserData => ({
-	id: user.id,
-	name: user.name,
-	avatar: user.avatar,
-	status: user.status as UserStatus
+export const MessageApiScheme = MessageScheme.omit({ sender: true }).extend({
+	senderId: idScheme
 });
 
-export const MessageToData = (message: Message & { sender: User }): MessageData => ({
-	id: message.id,
-	text: message.text,
-	timestamp: message.timestamp,
-	sender: UserToData(message.sender)
-});
+export const MessageCreateApiScheme = MessageApiScheme.omit({ id: true });
