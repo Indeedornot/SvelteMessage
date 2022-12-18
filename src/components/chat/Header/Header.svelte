@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Refresh, Users } from '$components/icons';
-	import { getName } from '$lib/helpers/socketio/User';
+	import { getUser } from '$lib/helpers/socketio/User';
 	import type { UserData } from '$lib/models/UserData';
 
 	import CurrUserTab from './CurrUserTab.svelte';
@@ -12,7 +12,7 @@
 	const refetchUser = async () => {
 		if (fetchingUser) return;
 		fetchingUser = true;
-		user = await getName();
+		user = await getUser();
 		console.log('fetched user', user);
 
 		fetchingUser = false;
@@ -33,18 +33,3 @@
 		<Users />
 	</button>
 </div>
-
-<style>
-	.messages > :global(*) {
-		padding-bottom: 12px;
-	}
-
-	.messages > :global(:first-child) {
-		padding-top: 12px;
-	}
-
-	.messages > :global(*) {
-		padding-left: 10px;
-		padding-right: 10px;
-	}
-</style>

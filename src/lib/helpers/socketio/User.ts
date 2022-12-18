@@ -1,15 +1,14 @@
 import { io } from '$lib/backend/socketio/socket-client';
-import type { UserData } from '$lib/models';
+import { trpc } from '$lib/backend/trpc/client';
+import { type UserData, UserStatus, UserToData } from '$lib/models';
+import { OnlineUsers, UsersCache } from '$lib/stores/MessageCache';
+import { get } from 'svelte/store';
 
 import { getUserData, setUserData, updateUserData } from '../DataStore';
 
-export const getOnlineUsers = (): Promise<UserData[]> => {
-	return new Promise<UserData[]>((resolve) => {
-		io.emit('UsersOnline');
-		io.once('UsersOnline', (data: UserData[]) => {
-			resolve(data);
-		});
-	});
+export const getOnlineUsers = async (): Promise<UserData[]> => {
+	const users = await trpc().user.getByStatus.query(UserStatus.Online);
+	return users.map(UserToData);
 };
 
 export const goOnline = (user: UserData): Promise<void> => {
@@ -21,21 +20,19 @@ export const goOnline = (user: UserData): Promise<void> => {
 	});
 };
 
-export const addUserListener = (
-	onOnline: (data: UserData) => void,
-	onOffline: (userId: number) => void,
-	onUserChanged: (userId: number, data: Partial<UserData>) => void
-) => {
+export const addUserListener = () => {
 	io.on('UserOnline', (data: UserData) => {
-		onOnline(data);
+		OnlineUsers.addUser(data);
+		UsersCache.updateUser(data.id, data);
 	});
 
 	io.on('UserOffline', (userId: number) => {
-		onOffline(userId);
+		OnlineUsers.removeUser(userId);
 	});
 
 	io.on('UserChanged', (userId: number, data: Partial<UserData>) => {
-		onUserChanged(userId, data);
+		OnlineUsers.updateUser(userId, data);
+		UsersCache.updateUser(userId, data);
 	});
 };
 

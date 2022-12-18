@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { slide } from '$lib/helpers/slideAnim';
 	import { sendNewMessage } from '$lib/helpers/socketio/Messages';
-	import type { MessageData, MessageNewData } from '$lib/models/MessageData';
+	import type { MessageCreateApiData, MessageData } from '$lib/models/MessageData';
 	import type { UserData } from '$lib/models/UserData';
 
 	import Header from './Header/Header.svelte';
@@ -19,7 +19,7 @@
 
 	const sendMessage = (text: string) => {
 		if (!canSend) return;
-		const data: MessageNewData = { text: text, sender: user, timestamp: new Date() };
+		const data: MessageCreateApiData = { text: text, senderId: user.id, timestamp: new Date() };
 		sendNewMessage(data);
 	};
 

@@ -52,19 +52,6 @@ export const addUserListener = (io: typedServer, socket: typedSocket) => {
 		socket.broadcast.emit('UserOnline', userData);
 	});
 
-	socket.on('UsersOnline', async () => {
-		// Send the list of connected users to the new user
-		const users = await prisma.user.findMany({
-			where: {
-				status: UserStatus.Online
-			}
-		});
-
-		console.log('UsersOnline', users);
-
-		socket.emit('UsersOnline', users.map(UserToData));
-	});
-
 	socket.on('UserChanged', async (data) => {
 		if (!socket.data.user) return;
 		if (Object.keys(data).length === 0) return;

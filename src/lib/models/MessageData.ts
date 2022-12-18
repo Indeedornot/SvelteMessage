@@ -13,10 +13,17 @@ export type MessageData = {
 	sender: UserData;
 };
 
-export type MessageNewData = {
+export type MessageCreateApiData = {
 	text: string;
 	timestamp: Date;
-	sender: UserData;
+	senderId: number;
+};
+
+export type MessageApiData = {
+	id: number;
+	text: string;
+	timestamp: Date;
+	senderId: number;
 };
 
 export const MessageConstr = {

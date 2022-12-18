@@ -1,16 +1,13 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import Chat from '$components/chat/Chat.svelte';
-	import { addMessageListener, getMessages } from '$lib/helpers/socketio/Messages';
-	import { addUserListener, getUser, getOnlineUsers, goOnline } from '$lib/helpers/socketio/User';
-	import type { MessageData, UserData } from '$lib/models';
 	import { io } from '$lib/backend/socketio/socket-client';
+	import { addMessageListener, getMessages } from '$lib/helpers/socketio/Messages';
+	import { addUserListener, getOnlineUsers, getUser, goOnline } from '$lib/helpers/socketio/User';
+	import type { MessageData, UserData } from '$lib/models';
+	import { MessageCache, OnlineUsers, UserStore, UsersCache } from '$lib/stores/MessageCache';
 	import { onDestroy, onMount } from 'svelte';
 
-	let messages: MessageData[] = [];
-	let user: UserData;
-
-	let onlineUsers: UserData[] = [];
 	let canSend = false;
 
 	onMount(() => {
@@ -19,39 +16,18 @@
 	});
 
 	const setup = async () => {
-		onlineUsers = await getOnlineUsers();
-		user = await getUser();
+		await OnlineUsers.fetchUsers();
 
-		await goOnline(user).then(() => {
-			onlineUsers = [...onlineUsers, user];
+		await UserStore.fetchUser().then(async (u) => {
+			await goOnline(u);
 		});
 
-		messages = await getMessages();
+		await MessageCache.fetchMessages();
 
 		//add listeners
-		addUserListener(
-			(data) => {
-				if (!onlineUsers.find((u) => u.id === data.id)) onlineUsers = [...onlineUsers, data];
-			},
-			(userId) => {
-				onlineUsers = onlineUsers.filter((u) => u.id !== userId);
-			},
-			(userId, data) => {
-				let user = onlineUsers.find((u) => u.id === userId);
-				if (!user) return;
+		addUserListener();
 
-				user = {
-					...user,
-					...data
-				};
-				onlineUsers = onlineUsers;
-			}
-		);
-
-		addMessageListener((message) => {
-			messages = [...messages, message];
-		});
-
+		addMessageListener();
 		canSend = true;
 	};
 
@@ -73,6 +49,9 @@
 
 <div class="flex h-full w-full flex-none items-center justify-center">
 	<div class="h-[775px] w-[650px]">
-		<Chat bind:messages={messages} bind:onlineUsers={onlineUsers} bind:user={user} canSend={canSend} />
+		<Chat bind:messages={$MessageCache} bind:onlineUsers={$OnlineUsers} bind:user={$UserStore} canSend={canSend} />
 	</div>
 </div>
+
+//! ADD usage of $UserStore in messages;
+ 

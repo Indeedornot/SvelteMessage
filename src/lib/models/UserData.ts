@@ -2,7 +2,7 @@ export type UserData = {
 	id: number;
 	name: string;
 	avatar: string;
-	status: UserStatus;
+	status: string;
 };
 
 export enum UserStatus {
