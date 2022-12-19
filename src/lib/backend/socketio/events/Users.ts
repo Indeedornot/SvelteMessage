@@ -1,4 +1,4 @@
-import { UserScheme, UserStatus } from '../../../models';
+import { UserScheme, UserUpdateScheme } from '../../../models';
 import { prisma } from '../../prisma/prisma';
 import type { typedServer, typedSocket } from '../socket-handler';
 
@@ -21,7 +21,7 @@ export const addUserListener = (io: typedServer, socket: typedSocket) => {
 				id: user.id
 			},
 			data: {
-				status: UserStatus.Offline
+				online: false
 			}
 		});
 
@@ -44,19 +44,20 @@ export const addUserListener = (io: typedServer, socket: typedSocket) => {
 				id: userData.id
 			},
 			data: {
-				status: UserStatus.Online
+				online: true
 			}
 		});
 
 		socket.data.user = user;
-		socket.broadcast.emit('UserOnline', userData);
+		socket.broadcast.emit('UserOnline', userData.id);
 	});
 
 	socket.on('UserChanged', async (data) => {
 		if (!socket.data.user) return;
-		if (Object.keys(data).length === 0) return;
 
-		const parsedData = UserScheme.partial().safeParse(data);
+		console.log('UserChanged', data);
+
+		const parsedData = UserUpdateScheme.safeParse(data);
 		if (!parsedData.success) {
 			console.error('Invalid user data');
 			return;

@@ -18,7 +18,7 @@ export async function injectSocketIO(server: any) {
 			status: UserStatus.Online
 		},
 		data: {
-			status: UserStatus.Offline
+			online: false
 		}
 	});
 
@@ -50,13 +50,13 @@ export async function injectSocketIO(server: any) {
 					id: userData.id
 				},
 				data: {
-					status: UserStatus.Online
+					online: true
 				}
 			});
 
 			socket.data.user = user;
 			socket.emit('Connected');
-			socket.broadcast.emit('UserOnline', user);
+			socket.broadcast.emit('UserOnline', user.id);
 		});
 
 		addUserListener(io, socket);

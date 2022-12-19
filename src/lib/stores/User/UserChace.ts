@@ -1,4 +1,4 @@
-import { getUser, updateUser } from '$lib/helpers/socketio/User';
+import { getSelfUser, updateUser } from '$lib/helpers/socketio/User';
 import type { UserData, UserUpdateData } from '$lib/models';
 import { get, writable } from 'svelte/store';
 
@@ -25,7 +25,7 @@ const createUserStore = () => {
 			console.log('equals', before === after);
 		},
 		fetchUser: async () => {
-			const UserData = await getUser();
+			const UserData = await getSelfUser();
 
 			set(UserData);
 			return UserData;

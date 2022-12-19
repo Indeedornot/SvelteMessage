@@ -18,6 +18,7 @@ model User {
     avatar   String
     status   String
     messages Message[]
+    online   Boolean   @default(false)
 }
 
 //	id: string;

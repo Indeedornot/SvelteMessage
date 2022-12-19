@@ -4,7 +4,8 @@ Todo:
   ☐ Message Editting (Laid grounds with MessageNewData)
   ☐ Stop currUserTab from growing on name change
   ☐ Add channels 
-
+  ☐ Fix invicible being in OnlineUsers.online
+  
 Done:
   ✔ Add Limit to Message text lenght @done(22-12-17 12:19)
   ✔ Styled Scrollbar @done(22-12-13 18:18)

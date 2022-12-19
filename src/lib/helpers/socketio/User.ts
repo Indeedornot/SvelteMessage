@@ -1,40 +1,35 @@
 import { io } from '$lib/backend/socketio/socket-client';
 import { trpc } from '$lib/backend/trpc/client';
-import { type UserData, UserStatus, type UserUpdateData } from '$lib/models';
-import { OnlineUsers, UsersCache } from '$lib/stores';
+import type { UserData, UserUpdateData } from '$lib/models';
+import { UsersCache } from '$lib/stores';
 
 import { getUserData, setUserData, updateUserData } from '../DataStore';
-
-export const getOnlineUsers = async (): Promise<UserData[]> => {
-	return trpc().user.getByStatus.query(UserStatus.Online);
-};
 
 export const goOnline = (user: UserData): Promise<void> => {
 	return new Promise<void>((resolve) => {
 		io.emit('Connected', user);
 		io.once('Connected', () => {
+			user.online = true;
 			resolve();
 		});
 	});
 };
 
 export const addUserListener = () => {
-	io.on('UserOnline', (data: UserData) => {
-		OnlineUsers.addUser(data);
-		UsersCache.addOrUpdateUser(data);
+	io.on('UserOnline', (userId: number) => {
+		UsersCache.status.setOnline(userId);
 	});
 
 	io.on('UserOffline', (userId: number) => {
-		OnlineUsers.removeUser(userId);
+		UsersCache.status.setOffline(userId);
 	});
 
-	io.on('UserChanged', (userId: number, data: Partial<UserData>) => {
-		OnlineUsers.updateUser(userId, data);
-		UsersCache.updateUser(userId, data);
+	io.on('UserChanged', (userId: number, data: UserUpdateData) => {
+		UsersCache.crud.update(userId, data);
 	});
 };
 
-export const getUser = async (): Promise<UserData> => {
+export const getSelfUser = async (): Promise<UserData> => {
 	const userData = getUserData();
 	console.log('userData', userData);
 
@@ -62,4 +57,8 @@ export const updateUser = (data: UserUpdateData): Promise<void> => {
 
 export const getUsers = async (): Promise<UserData[]> => {
 	return await trpc().user.getAll.query();
+};
+
+export const getUserById = async (userId: number): Promise<UserData> => {
+	return await trpc().user.getById.query(userId);
 };

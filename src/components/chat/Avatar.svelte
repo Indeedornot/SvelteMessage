@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { UserStatus } from '$lib/models';
+	import { type UserStatus, getStatusColor } from '$lib/models';
 
 	export let width: number;
 	export let height: number;
@@ -19,6 +19,6 @@
 		<img src={src} width={width} height={height} class:rounded-full={rounded} />
 	{/if}
 	{#if status}
-		<div class="h-[12px] w-[12px] place-self-end rounded-full bg-{status}" />
+		<div class="h-[12px] w-[12px] place-self-end rounded-full bg-{getStatusColor(status)}" />
 	{/if}
 </div>

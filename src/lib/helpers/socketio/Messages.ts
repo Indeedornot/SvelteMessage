@@ -7,7 +7,7 @@ import { get } from 'svelte/store';
 export const getMessages = async () => {
 	const userCache: UserData[] = get(UsersCache);
 	if (userCache.length === 0) {
-		await UsersCache.fetchUsers();
+		await UsersCache.fetch.users();
 	}
 
 	return await trpc()
@@ -35,7 +35,7 @@ export const getMessages = async () => {
 					return await trpc()
 						.user.getById.query(message.senderId)
 						.then((user) => {
-							UsersCache.addUser(user);
+							UsersCache.crud.add(user);
 							return ApiToMsgData(message, user);
 						});
 				})
@@ -65,7 +65,7 @@ export const addMessageListener = () => {
 		await trpc()
 			.user.getById.query(message.senderId)
 			.then((user) => {
-				UsersCache.addUser(user);
+				UsersCache.crud.add(user);
 				MessageCache.addMessage(ApiToMsgData(message, user));
 
 				return user;

@@ -2,7 +2,7 @@
 	import { slide } from '$lib/helpers/slideAnim';
 	import { sendNewMessage } from '$lib/helpers/socketio/Messages';
 	import type { MessageCreateApiData } from '$lib/models/MessageData';
-	import { MessageCache, OnlineUsers, UserStore } from '$lib/stores';
+	import { MessageCache, OnlineUsersStore, UserStore } from '$lib/stores';
 
 	import Header from './Header/Header.svelte';
 	import Message from './Message/Message.svelte';
@@ -36,13 +36,17 @@
 		</div>
 		{#if showUsers}
 			<div
-				class="users flex h-full w-[200px] flex-none flex-col bg-dark"
+				class="users flex h-full w-[200px] flex-none flex-col overflow-y-scroll bg-dark"
 				in:slide={{ duration: 150, axis: 'z' }}
 				out:slide={{ duration: 150, axis: 'z' }}
 			>
 				<UserTab user={$UserStore} />
-				{#each $OnlineUsers as onlineUser (onlineUser.id)}
+				{#each $OnlineUsersStore.online as onlineUser (onlineUser.id)}
 					<UserTab user={onlineUser} />
+				{/each}
+
+				{#each $OnlineUsersStore.offline as offlineUser (offlineUser.id)}
+					<UserTab user={offlineUser} />
 				{/each}
 			</div>{/if}
 	</div>

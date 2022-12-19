@@ -4,7 +4,7 @@
 	import { io } from '$lib/backend/socketio/socket-client';
 	import { addMessageListener } from '$lib/helpers/socketio/Messages';
 	import { addUserListener, goOnline } from '$lib/helpers/socketio/User';
-	import { MessageCache, OnlineUsers, UserStore } from '$lib/stores';
+	import { MessageCache, UserStore, UsersCache } from '$lib/stores';
 	import { onDestroy, onMount } from 'svelte';
 
 	let canSend = false;
@@ -16,7 +16,6 @@
 
 	const setup = async () => {
 		await Promise.all([
-			OnlineUsers.fetchUsers(),
 			UserStore.fetchUser().then(async (u) => {
 				await goOnline(u);
 			})
@@ -25,8 +24,10 @@
 		addUserListener();
 		addMessageListener();
 
-		MessageCache.fetchMessages().then(() => {
-			canSend = true;
+		UsersCache.fetch.users().then(() => {
+			MessageCache.fetchMessages().then(() => {
+				canSend = true;
+			});
 		});
 	};
 

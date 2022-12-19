@@ -18,8 +18,11 @@ export const UserScheme = z.object({
 	id: idScheme,
 	name: z.string().min(UserConstr.name.minLength).max(UserConstr.name.maxLength),
 	avatar: urlSchema,
-	status: statusSchema
+	status: statusSchema,
+	online: z.boolean()
 });
+
+export const UserUpdateScheme = UserScheme.omit({ online: true, id: true }).partial();
 
 export const MessageScheme = z.object({
 	id: idScheme,
