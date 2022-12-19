@@ -16,7 +16,7 @@
 		options={{
 			fallbackPlacements: [],
 			placement: 'right-start',
-			offset: [-3, 16],
+			offset: {x: 16, y: -3},
 			strategy: 'absolute'
 		}}
 		bind:showTooltip={showTooltip}

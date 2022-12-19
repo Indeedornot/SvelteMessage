@@ -1,7 +1,3 @@
-//Quick typing fix for svelte-dnd-action
 declare namespace svelte.JSX {
-	interface HTMLAttributes<T> {
-		onclickOutside?: () => void;
-		ondropdownHover?: (event: CustomEvent<boolean>) => void;
-	}
+	interface HTMLAttributes<T> {}
 }

@@ -28,4 +28,50 @@ export const addMessageListener = (io: typedServer, socket: typedSocket) => {
 
 		io.emit('Message', message);
 	});
+
+	socket.on('MessageDeleted', async (messageId) => {
+		if (!socket.data.user) return;
+
+		const message = await prisma.message.findUnique({
+			where: {
+				id: messageId
+			}
+		});
+
+		if (!message) return;
+
+		if (message.senderId !== socket.data.user.id) return;
+
+		await prisma.message.delete({
+			where: {
+				id: messageId
+			}
+		});
+
+		io.emit('MessageDeleted', messageId);
+	});
+
+	socket.on('MessageChanged', async (messageId, data) => {
+		if (!socket.data.user) return;
+
+		const message = await prisma.message.findUnique({
+			where: {
+				id: messageId
+			}
+		});
+
+		if (!message) return;
+		if (message.senderId !== socket.data.user.id) return;
+
+		await prisma.message.update({
+			where: {
+				id: messageId
+			},
+			data: {
+				...data
+			}
+		});
+
+		socket.broadcast.emit('MessageChanged', messageId, data);
+	});
 };

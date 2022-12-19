@@ -27,9 +27,8 @@
 		bind:this={buttonRef}
 		class={className}
 		use:popperRef
-		use:dropdownHover
-		on:dropdownHover={(e) => {
-			showTooltip = e.detail;
+		use:dropdownHover={(hover) => {
+			showTooltip = hover;
 		}}
 	>
 		<slot name="button" />
@@ -39,8 +38,7 @@
 {#if showTooltip}
 	<div
 		use:popperContent={extraOpts}
-		use:clickOutside={[buttonRef]}
-		on:clickOutside={() => (showTooltip = false)}
+		use:clickOutside={{ exceptions: [buttonRef], callback: () => (showTooltip = false) }}
 		style:z-index={zIndex}
 	>
 		<slot name="dropdown" />

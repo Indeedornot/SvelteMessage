@@ -5,7 +5,7 @@
 	import { MessageCache, OnlineUsers, UserStore } from '$lib/stores';
 
 	import Header from './Header/Header.svelte';
-	import Message from './Message.svelte';
+	import Message from './Message/Message.svelte';
 	import SendBar from './SendBar/SendBar.svelte';
 	import UserTab from './SideBar/UserTab.svelte';
 
@@ -27,7 +27,7 @@
 		<div class="flex min-w-0 flex-grow flex-col bg-default">
 			<div class="messages flex min-h-0 w-full flex-grow flex-col overflow-y-auto">
 				{#each $MessageCache as message (message.id)}
-					<Message data={message} online={!!$OnlineUsers.find((x) => x.id === message.sender.id)} />
+					<Message data={message} />
 				{/each}
 			</div>
 			<div class="px-2.5 pb-4">
@@ -59,7 +59,7 @@
 
 	.messages > :global(*) {
 		padding-left: 10px;
-		padding-right: 10px;
+		padding-right: 8px;
 	}
 
 	.users > :global(*) {

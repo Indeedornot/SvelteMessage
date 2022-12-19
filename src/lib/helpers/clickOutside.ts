@@ -1,7 +1,10 @@
-/** Dispatch event on click outside of node */
-export function clickOutside(node: HTMLElement, exceptions: HTMLElement[] = []) {
-	let except = exceptions;
+type ClickOutsideProps = {
+	exceptions?: HTMLElement[];
+	callback: (node: HTMLElement) => void;
+};
 
+/** Dispatch event on click outside of node */
+export function clickOutside(node: HTMLElement, { exceptions = [], callback }: ClickOutsideProps) {
 	const handleClick = (event: Event) => {
 		const target = event.target as HTMLElement;
 
@@ -14,9 +17,9 @@ export function clickOutside(node: HTMLElement, exceptions: HTMLElement[] = []) 
 			//not a child of node
 			!node.contains(target) &&
 			//not in exceptions
-			!except.find((x) => x?.contains(target) || x === target)
+			!exceptions.find((x) => x?.contains(target) || x === target)
 		) {
-			node.dispatchEvent(new CustomEvent('clickOutside', { detail: node }));
+			callback(node);
 		}
 	};
 
@@ -29,9 +32,6 @@ export function clickOutside(node: HTMLElement, exceptions: HTMLElement[] = []) 
 			document.removeEventListener('click', handleClick, { capture: true });
 			document.removeEventListener('touchstart', handleClick, { capture: true });
 			document.removeEventListener('mousedown', handleClick, { capture: true });
-		},
-		update(newExceptions: HTMLElement[]) {
-			except = newExceptions;
 		}
 	};
 }

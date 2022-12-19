@@ -33,3 +33,5 @@ export const MessageApiScheme = MessageScheme.omit({ sender: true }).extend({
 });
 
 export const MessageCreateApiScheme = MessageApiScheme.omit({ id: true });
+
+export const MessageChangedScheme = MessageScheme.omit({ id: true, sender: true, timestamp: true });

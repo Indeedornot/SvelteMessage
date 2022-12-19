@@ -45,9 +45,10 @@
 	options={{
 		fallbackPlacements: [],
 		placement: 'bottom-start',
-		offset: [0, 4],
+		offset: { x: 4, y: 0 },
 		strategy: 'absolute'
 	}}
+	zIndex={1}
 >
 	<button
 		slot="button"

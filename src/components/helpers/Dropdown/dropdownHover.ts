@@ -1,4 +1,4 @@
-export function dropdownHover(node: HTMLElement) {
+export function dropdownHover(node: HTMLElement, callback: (hovering: boolean) => void) {
 	const parent = node.parentElement;
 	if (!parent) return;
 
@@ -7,20 +7,12 @@ export function dropdownHover(node: HTMLElement) {
 	const handleEnter = () => {
 		//if a user is hovering over an element or a sibling of an element, don't hide the tooltip
 		clearTimeout(timeout);
-		node.dispatchEvent(
-			new CustomEvent('dropdownHover', {
-				detail: true
-			})
-		);
+		callback(true);
 	};
 
 	const handleLeave = () => {
 		timeout = setTimeout(() => {
-			node.dispatchEvent(
-				new CustomEvent('dropdownHover', {
-					detail: false
-				})
-			);
+			callback(false);
 		}, 100);
 	};
 

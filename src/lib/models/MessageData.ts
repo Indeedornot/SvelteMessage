@@ -13,11 +13,9 @@ export type MessageData = {
 	sender: UserData;
 };
 
-export type MessageCreateApiData = {
-	text: string;
-	timestamp: Date;
-	senderId: number;
-};
+export type MessageCreateApiData = Omit<MessageApiData, 'id'>;
+
+export type MessageChangedData = Omit<MessageData, 'id' | 'sender' | 'timestamp'>;
 
 export type MessageApiData = {
 	id: number;

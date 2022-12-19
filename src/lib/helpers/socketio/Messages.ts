@@ -1,6 +1,6 @@
 import { io } from '$lib/backend/socketio/socket-client';
 import { trpc } from '$lib/backend/trpc/client';
-import type { MessageApiData, MessageCreateApiData, MessageData, UserData } from '$lib/models';
+import type { MessageApiData, MessageChangedData, MessageCreateApiData, MessageData, UserData } from '$lib/models';
 import { MessageCache, UserStore, UsersCache } from '$lib/stores';
 import { get } from 'svelte/store';
 
@@ -71,10 +71,22 @@ export const addMessageListener = () => {
 				return user;
 			});
 	});
+
+	io.on('MessageDeleted', (messageId: number) => {
+		MessageCache.removeMessage(messageId);
+	});
+
+	io.on('MessageChanged', (messageId, message) => {
+		MessageCache.updateMessage(messageId, message);
+	});
 };
 
 export const sendNewMessage = (message: MessageCreateApiData) => {
 	io.emit('Message', message);
+};
+
+export const changeMessage = (messageId: number, message: MessageChangedData) => {
+	io.emit('MessageChanged', messageId, message);
 };
 
 const ApiToMsgData = (message: MessageApiData, user: UserData): MessageData => {

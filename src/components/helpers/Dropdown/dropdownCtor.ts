@@ -1,6 +1,6 @@
 import { createPopperActions } from 'svelte-popperjs';
 
-type Placement =
+export type Placement =
 	| 'auto'
 	| 'auto-start'
 	| 'auto-end'
@@ -17,11 +17,30 @@ type Placement =
 	| 'left-start'
 	| 'left-end';
 
+export type Offset = { x: number; y: number };
+
 export type DropdownProps = {
 	placement: Placement;
-	offset: [x: number, y: number];
+	offset: Offset;
 	fallbackPlacements: Placement[];
 	strategy: 'absolute' | 'fixed';
+};
+
+export type ExtraOpts = {
+	modifiers: [
+		{
+			name: 'offset';
+			options: {
+				offset: [number, number];
+			};
+		},
+		{
+			name: 'flip';
+			options: {
+				fallbackPlacements: Placement[];
+			};
+		}
+	];
 };
 
 export const createDropdown = (data: DropdownProps) => {
@@ -31,12 +50,12 @@ export const createDropdown = (data: DropdownProps) => {
 		strategy: strategy
 	});
 
-	const extraOpts = {
+	const extraOpts: ExtraOpts = {
 		modifiers: [
 			{
 				name: 'offset',
 				options: {
-					offset: offset
+					offset: [offset.y, offset.x]
 				}
 			},
 			{
