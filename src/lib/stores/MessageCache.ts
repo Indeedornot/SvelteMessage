@@ -1,4 +1,4 @@
-import { changeMessage, getMessages } from '$lib/helpers/socketio/Messages';
+import { changeMessage, deleteMessage, getMessages } from '$lib/helpers/socketio/Messages';
 import type { MessageChangedData, MessageData } from '$lib/models';
 import { writable } from 'svelte/store';
 
@@ -26,7 +26,12 @@ const createMessageStore = () => {
 		set,
 		update,
 		addMessage: (message: MessageData) => update((messages) => [...messages, message]),
-		removeMessage: (messageId: number) => update((messages) => messages.filter((message) => message.id !== messageId)),
+		removeMessage: (messageId: number) => {
+			update((messages) => {
+				deleteMessage(messageId);
+				return messages.filter((message) => message.id !== messageId);
+			});
+		},
 		updateMessage: (messageId: number, data: MessageChangedData) => {
 			update((messages) => {
 				const message = messages.find((message) => message.id === messageId);

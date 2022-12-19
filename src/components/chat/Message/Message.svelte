@@ -16,9 +16,13 @@
 	const onEdited = (text: string) => {
 		MessageCache.updateMessage(data.id, { text: text });
 	};
+
+	const onRemove = () => {
+		MessageCache.removeMessage(data.id);
+	};
 </script>
 
 <div class="group relative">
 	<MessageContent data={data} bind:isEdited={isEdited} onEdited={onEdited} />
-	<MoreDropdown onEdit={onEdit} senderId={data.sender.id} />
+	<MoreDropdown onEdit={onEdit} senderId={data.sender.id} onRemove={onRemove} />
 </div>

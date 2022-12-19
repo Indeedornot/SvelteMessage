@@ -48,7 +48,7 @@ export const addMessageListener = (io: typedServer, socket: typedSocket) => {
 			}
 		});
 
-		io.emit('MessageDeleted', messageId);
+		socket.broadcast.emit('MessageDeleted', messageId);
 	});
 
 	socket.on('MessageChanged', async (messageId, data) => {

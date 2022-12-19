@@ -89,6 +89,10 @@ export const changeMessage = (messageId: number, message: MessageChangedData) =>
 	io.emit('MessageChanged', messageId, message);
 };
 
+export const deleteMessage = (messageId: number) => {
+	io.emit('MessageDeleted', messageId);
+};
+
 const ApiToMsgData = (message: MessageApiData, user: UserData): MessageData => {
 	return {
 		id: message.id,
