@@ -3,6 +3,8 @@
 
 	export let resetDisplay: () => void;
 	export let updateDisplay: () => void;
+
+	export let isUpdating: boolean;
 </script>
 
 <div class="flex flex-grow gap-1">
@@ -10,6 +12,7 @@
 	<button
 		class="flex flex-grow justify-center rounded-sm bg-accent px-2 text-[12px] text-accent"
 		on:click={updateDisplay}
+		class:bg-subtle={isUpdating}
 	>
 		Sumbit
 	</button>

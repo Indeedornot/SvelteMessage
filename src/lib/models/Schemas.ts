@@ -24,17 +24,29 @@ export const UserScheme = z.object({
 
 export const UserUpdateScheme = UserScheme.omit({ online: true, id: true }).partial();
 
+export const messageTextScheme = z.string().min(MessageConstr.text.minLength).max(MessageConstr.text.maxLength);
+
 export const MessageScheme = z.object({
 	id: idScheme,
-	text: z.string().min(MessageConstr.text.minLength).max(MessageConstr.text.maxLength),
-	timestamp: dateSchema,
-	sender: UserScheme
+	text: messageTextScheme,
+	sender: UserScheme,
+	createdAt: dateSchema,
+	updatedAt: dateSchema
 });
 
 export const MessageApiScheme = MessageScheme.omit({ sender: true }).extend({
 	senderId: idScheme
 });
 
-export const MessageCreateApiScheme = MessageApiScheme.omit({ id: true });
+export const MessageCreateApiScheme = z.object({
+	text: messageTextScheme
+});
 
-export const MessageChangedScheme = MessageScheme.omit({ id: true, sender: true, timestamp: true });
+export const MessageChangedScheme = z.object({
+	text: messageTextScheme
+});
+
+export const MessageUpdateApiScheme = MessageChangedScheme.extend({
+	updatedAt: dateSchema,
+	semderId: idScheme
+});

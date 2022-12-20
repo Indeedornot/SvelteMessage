@@ -1,6 +1,7 @@
+import { updateRef } from '$lib/helpers/jsUtils';
 import { changeMessage, deleteMessage, getMessages } from '$lib/helpers/socketio/Messages';
-import type { MessageChangedData, MessageData } from '$lib/models';
-import { writable } from 'svelte/store';
+import type { MessageChangedData, MessageData, MessageUpdateApiData } from '$lib/models';
+import { get, writable } from 'svelte/store';
 
 import { UserStore, UsersCache } from './User';
 
@@ -32,13 +33,25 @@ const createMessageStore = () => {
 				return messages.filter((message) => message.id !== messageId);
 			});
 		},
-		updateMessage: (messageId: number, data: MessageChangedData) => {
+		changeMessage: async (messageId: number, data: MessageChangedData) => {
+			const message = get(MessageCache).find((message) => message.id === messageId);
+			if (!message) return;
+
+			const updateData = await changeMessage(messageId, data);
+
 			update((messages) => {
+				updateRef(message, updateData);
+				return messages;
+			});
+		},
+		updateMessage: (messageId: number, data: MessageUpdateApiData) => {
+			update((messages) => {
+				console.log('Msg UPT', messageId, data);
+
 				const message = messages.find((message) => message.id === messageId);
 				if (!message) return messages;
 
-				updateMessage(message, data);
-				changeMessage(message.id, data);
+				updateRef(message, data);
 				return messages;
 			});
 		},
@@ -50,9 +63,3 @@ const createMessageStore = () => {
 };
 
 export const MessageCache = createMessageStore();
-
-const updateMessage = (message: MessageData, data: MessageChangedData) => {
-	for (const key in data) {
-		message[key] = data[key];
-	}
-};

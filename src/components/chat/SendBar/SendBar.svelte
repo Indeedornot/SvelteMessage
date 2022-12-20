@@ -6,6 +6,7 @@
 	import SendButton from './SendButton.svelte';
 
 	export let onSumbit: (text: string) => void;
+	export let canSend: boolean;
 
 	let inputBar: HTMLTextAreaElement;
 
@@ -36,6 +37,7 @@
 					e.preventDefault();
 					sendMessage();
 				}}
+				disabled={!canSend}
 				class="box-border
 				max-h-[100px] w-full resize-none
 				border-0 bg-transparent py-0

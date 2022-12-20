@@ -77,6 +77,7 @@ export const addUserListener = (io: typedServer, socket: typedSocket) => {
 			}
 		});
 
-		io.emit('UserChanged', user.id, data);
+		socket.broadcast.emit('UserChanged', user.id, data);
+		socket.emit('UserFinishedChanging', data);
 	});
 };

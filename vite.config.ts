@@ -4,6 +4,7 @@ import { injectSocketIO } from './src/lib/backend/socketio/socket-handler';
 
 const webSocketServer = {
 	name: 'sveltekit-socket-io',
+	//@ts-expect-error - until sveltekit supports websockets
 	configureServer(server) {
 		console.log('configureServer');
 		injectSocketIO(server);

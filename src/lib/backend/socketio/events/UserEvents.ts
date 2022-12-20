@@ -4,6 +4,7 @@ export interface UserSTCEvents {
 	UserOnline: (userId: number) => void; //Notifies of a user going online (saves data)
 	UserOffline: (userId: number) => void; //Notifies of a user going offline (data is already stored in clients)
 	UserChanged: (userId: number, data: UserUpdateData) => void; //Notifies of a user changing their name
+	UserFinishedChanging: (data: UserUpdateData) => void; //Notifies of a user changing their name
 }
 
 export interface UserCTSEvents {

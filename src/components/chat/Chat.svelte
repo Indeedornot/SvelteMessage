@@ -14,7 +14,7 @@
 
 	const sendMessage = (text: string) => {
 		if (!canSend || !$UserStore) return;
-		const data: MessageCreateApiData = { text: text, senderId: $UserStore.id, timestamp: new Date() };
+		const data: MessageCreateApiData = { text: text };
 		sendNewMessage(data);
 	};
 </script>
@@ -31,7 +31,7 @@
 				{/each}
 			</div>
 			<div class="px-2.5 pb-4">
-				<SendBar onSumbit={sendMessage} />
+				<SendBar onSumbit={sendMessage} canSend={canSend} />
 			</div>
 		</div>
 		{#if showUsers}

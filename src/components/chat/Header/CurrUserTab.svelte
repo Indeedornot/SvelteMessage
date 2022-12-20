@@ -1,5 +1,6 @@
 <script lang="ts">
 	import DropdownBase from '$components/helpers/Dropdown/DropdownBase.svelte';
+	import { getDifferentInObject, isEmptyObject } from '$lib/helpers/jsUtils';
 	import type { UserUpdateData } from '$lib/models';
 	import { UserStore } from '$lib/stores';
 
@@ -11,31 +12,34 @@
 	export let canShow = true;
 	export let showTooltip = true;
 
-	let newName: string = $UserStore?.name ?? '';
-	let newAvatar: string = $UserStore?.avatar ?? '';
+	let updateData = {
+		name: $UserStore?.name ?? '',
+		avatar: $UserStore?.avatar ?? ''
+	};
 
 	$: $UserStore, resetDisplay();
 	const resetDisplay = () => {
-		newName = $UserStore?.name ?? '';
-		newAvatar = $UserStore?.avatar ?? '';
+		updateData = {
+			name: $UserStore?.name ?? '',
+			avatar: $UserStore?.avatar ?? ''
+		};
 	};
 
-	let updatingData = false;
+	let isUpdating = false;
 	const updateDisplay = async () => {
-		if (updatingData) return;
-		updatingData = true;
+		if (isUpdating) return;
+		if (!$UserStore) return;
+		isUpdating = true;
 
-		const data: UserUpdateData = {};
-
-		if (newName !== $UserStore?.name) data.name = newName;
-		if (newAvatar !== $UserStore?.avatar) data.avatar = newAvatar;
-		if (Object.keys(data).length === 0) {
-			updatingData = false;
+		const sendData: UserUpdateData = getDifferentInObject($UserStore, updateData);
+		if (isEmptyObject(sendData)) {
+			isUpdating = false;
 			return;
 		}
 
-		await UserStore.updateUser(data);
-		updatingData = false;
+		UserStore.updateUser(sendData).then(() => {
+			isUpdating = false;
+		});
 	};
 </script>
 
@@ -68,11 +72,11 @@
 	<div slot="dropdown" class="flex flex-none items-center rounded-md border-2 border-subtle bg-overlay">
 		<div class="m-2 w-[166px] rounded-md bg-dark p-2">
 			<div class="flex flex-col items-center">
-				<DisplayChange bind:newAvatar={newAvatar} bind:newName={newName} />
+				<DisplayChange bind:newAvatar={updateData.avatar} bind:newName={updateData.name} isUpdating={isUpdating} />
 				<StatusChange />
 			</div>
 			<div class="w-full pt-1.5">
-				<SumbitChange resetDisplay={resetDisplay} updateDisplay={updateDisplay} />
+				<SumbitChange isUpdating={isUpdating} resetDisplay={resetDisplay} updateDisplay={updateDisplay} />
 			</div>
 		</div>
 	</div>

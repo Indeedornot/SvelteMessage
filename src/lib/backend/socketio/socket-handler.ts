@@ -41,8 +41,11 @@ export async function injectSocketIO(server: any) {
 				}
 			});
 			if (!exists) {
-				console.error('User does not exist');
-				return;
+				await prisma.user.create({
+					data: {
+						...userData //!!! This is not safe, but it's just a test project
+					}
+				});
 			}
 
 			await prisma.user.update({

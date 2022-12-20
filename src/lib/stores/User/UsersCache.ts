@@ -1,9 +1,9 @@
+import { updateRef } from '$lib/helpers/jsUtils';
 import { getUserById, getUsers } from '$lib/helpers/socketio/User';
 import type { UserData, UserUpdateData } from '$lib/models';
 import { derived, get, writable } from 'svelte/store';
 
-import { UserStore } from './UserChace';
-import { updateUserRef } from './helpers';
+import { UserStore } from './UserCache';
 
 const createUsersStore = () => {
 	const { subscribe, set, update } = writable<UserData[]>([]);
@@ -23,7 +23,7 @@ const createUsersStore = () => {
 				const user = users.find((user) => user.id === userId);
 				if (!user) return users;
 
-				updateUserRef(user, data);
+				updateRef(user, data);
 				return users;
 			});
 		},
@@ -31,7 +31,7 @@ const createUsersStore = () => {
 			update((users) => {
 				const user = users.find((u) => u.id === updateData.id);
 				if (!user) return [...users, updateData];
-				updateUserRef(user, updateData);
+				updateRef(user, updateData);
 
 				return users;
 			});

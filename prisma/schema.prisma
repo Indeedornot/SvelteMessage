@@ -13,12 +13,14 @@ datasource db {
 //	status: UserStatus;
 
 model User {
-    id       Int       @id @default(autoincrement())
-    name     String
-    avatar   String
-    status   String
-    messages Message[]
-    online   Boolean   @default(false)
+    id        Int       @id @default(autoincrement())
+    name      String
+    avatar    String
+    status    String
+    messages  Message[]
+    online    Boolean   @default(false)
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
 }
 
 //	id: string;
@@ -29,7 +31,8 @@ model User {
 model Message {
     id        Int      @id @default(autoincrement())
     text      String
-    timestamp DateTime
     sender    User     @relation(fields: [senderId], references: [id])
     senderId  Int
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }

@@ -6,6 +6,7 @@
 
 	export let data: MessageData;
 	export let isEdited: boolean;
+	export let isUpdating: boolean;
 	export let onEdited: (text: string) => void;
 
 	let editedText: string = data.text;
@@ -35,36 +36,42 @@
 		<div class="flex w-full flex-none flex-col overflow-hidden pl-1">
 			<div class="flex w-full flex-none items-center pl-1">
 				<span class="text-[16px] text-default">{data.sender.name}</span>
-				<Time class="ml-1 text-[12px] text-muted" timestamp={data.timestamp} relative live />
+				<Time class="ml-1 text-[12px] text-muted" timestamp={data.createdAt} relative live />
 			</div>
 			<div class="flex min-w-0 flex-none flex-col break-all text-default">
-				{#if !isEdited}
-					<div class="whitespace-pre p-0 pl-1">
-						{data.text}
-					</div>
+				{#if !isUpdating}
+					{#if !isEdited}
+						<div class="whitespace-pre p-0 pl-1">
+							{data.text}
+						</div>
+					{:else}
+						<div
+							class="pr-0,5 whitespace-pre rounded-md bg-dark p-0 pl-1 outline-none"
+							contenteditable="true"
+							on:keydown={(e) => {
+								if (e.key === 'Escape') {
+									e.preventDefault();
+									cancelEdit();
+								} else if (e.key === 'Enter' && !e.shiftKey) {
+									e.preventDefault();
+									edited();
+								}
+							}}
+							on:input={(e) => {
+								editedText = e.currentTarget.innerText;
+							}}
+						>
+							{editedText}
+						</div>
+						<div class="flex flex-row gap-1 text-[12px]">
+							<p>escape to <button class="text-anchor" on:click={cancelEdit}>cancel</button></p>
+							•
+							<p>enter to save <button class="text-anchor" on:click={edited}>sumbit</button></p>
+						</div>
+					{/if}
 				{:else}
-					<div
-						class="pr-0,5 whitespace-pre rounded-md bg-dark p-0 pl-1 outline-none"
-						contenteditable="true"
-						on:keydown={(e) => {
-							if (e.key === 'Escape') {
-								e.preventDefault();
-								cancelEdit();
-							} else if (e.key === 'Enter' && !e.shiftKey) {
-								e.preventDefault();
-								edited();
-							}
-						}}
-						on:input={(e) => {
-							editedText = e.currentTarget.innerText;
-						}}
-					>
-						{editedText}
-					</div>
-					<div class="flex flex-row gap-1 text-[12px]">
-						<p>escape to <button class="text-anchor" on:click={cancelEdit}>cancel</button></p>
-						•
-						<p>enter to save <button class="text-anchor" on:click={edited}>sumbit</button></p>
+					<div class="whitespace-pre bg-dark p-0 pl-1">
+						{data.text}
 					</div>
 				{/if}
 			</div>

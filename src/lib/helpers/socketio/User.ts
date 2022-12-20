@@ -45,12 +45,12 @@ export const getSelfUser = async (): Promise<UserData> => {
 		});
 };
 
-export const updateUser = (data: UserUpdateData): Promise<void> => {
-	return new Promise<void>((resolve) => {
+export const updateUser = (data: UserUpdateData): Promise<UserUpdateData> => {
+	return new Promise((resolve) => {
 		io.emit('UserChanged', data);
 		updateUserData(data);
-		io.once('UserChanged', () => {
-			resolve();
+		io.once('UserFinishedChanging', (data) => {
+			resolve(data);
 		});
 	});
 };

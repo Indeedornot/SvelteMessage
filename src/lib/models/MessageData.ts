@@ -9,19 +9,30 @@ export type MessageData = {
 
 	id: number;
 	text: string;
-	timestamp: Date;
 	sender: UserData;
+	createdAt: Date;
+	updatedAt: Date;
 };
 
-export type MessageCreateApiData = Omit<MessageApiData, 'id'>;
+export type MessageCreateApiData = {
+	text: string;
+};
 
-export type MessageChangedData = Omit<MessageData, 'id' | 'sender' | 'timestamp'>;
+export type MessageChangedData = {
+	text: string;
+};
+
+export type MessageUpdateApiData = {
+	text: string;
+	updatedAt: Date;
+};
 
 export type MessageApiData = {
 	id: number;
 	text: string;
-	timestamp: Date;
 	senderId: number;
+	createdAt: Date;
+	updatedAt: Date;
 };
 
 export const MessageConstr = {

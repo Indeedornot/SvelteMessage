@@ -7,14 +7,23 @@
 
 	export let data: MessageData;
 
-	let isEdited: boolean = false;
+	let isEdited = false;
+	let isUpdating = false;
 
 	const onEdit = () => {
+		if (isUpdating) return;
 		isEdited = !isEdited;
 	};
 
-	const onEdited = (text: string) => {
-		MessageCache.updateMessage(data.id, { text: text });
+	const onEdited = async (text: string) => {
+		console.log(isUpdating, text);
+
+		if (isUpdating) return;
+		isUpdating = true;
+		await MessageCache.changeMessage(data.id, { text: text });
+		console.log('updated');
+
+		isUpdating = false;
 	};
 
 	const onRemove = () => {
@@ -23,6 +32,6 @@
 </script>
 
 <div class="group relative">
-	<MessageContent data={data} bind:isEdited={isEdited} onEdited={onEdited} />
+	<MessageContent data={data} bind:isEdited={isEdited} isUpdating={isUpdating} onEdited={onEdited} />
 	<MoreDropdown onEdit={onEdit} senderId={data.sender.id} onRemove={onRemove} />
 </div>

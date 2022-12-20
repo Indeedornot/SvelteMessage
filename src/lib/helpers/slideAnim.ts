@@ -10,7 +10,11 @@ export function slide(node: HTMLElement, { delay = 0, duration = 400, easing = c
 	const padding_end_value = parseFloat(style.padding + secondary_dimensions[1]);
 	const margin_start_value = parseFloat(style.margin + secondary_dimensions[0]);
 	const margin_end_value = parseFloat(style.margin + secondary_dimensions[1]);
+
+	//@ts-expect-error - we know that the border properties are there
 	const border_width_start_value = parseFloat(style[`border${secondary_dimensions[0]}Width`]);
+
+	//@ts-expect-error - see above
 	const border_width_end_value = parseFloat(style[`border${secondary_dimensions[1]}Width`]);
 	return {
 		delay,

@@ -5,6 +5,8 @@ import type { typedServer, typedSocket } from '../socket-handler';
 export const addMessageListener = (io: typedServer, socket: typedSocket) => {
 	// Receive incoming messages and broadcast them
 	socket.on('Message', async (newMessage) => {
+		if (!socket.data.user) return;
+
 		const parseData = MessageCreateApiScheme.safeParse(newMessage);
 		if (!parseData.success) {
 			console.error('Invalid message received', parseData.error);
@@ -17,10 +19,9 @@ export const addMessageListener = (io: typedServer, socket: typedSocket) => {
 		const message = await prisma.message.create({
 			data: {
 				text: newMessageData.text,
-				timestamp: newMessageData.timestamp,
 				sender: {
 					connect: {
-						id: newMessageData.senderId
+						id: socket.data.user?.id
 					}
 				}
 			}
@@ -63,7 +64,7 @@ export const addMessageListener = (io: typedServer, socket: typedSocket) => {
 		if (!message) return;
 		if (message.senderId !== socket.data.user.id) return;
 
-		await prisma.message.update({
+		const { updatedAt } = await prisma.message.update({
 			where: {
 				id: messageId
 			},
@@ -72,6 +73,13 @@ export const addMessageListener = (io: typedServer, socket: typedSocket) => {
 			}
 		});
 
-		socket.broadcast.emit('MessageChanged', messageId, data);
+		const updateData = {
+			...data,
+			updatedAt: updatedAt
+		};
+
+		socket.broadcast.emit('MessageChanged', messageId, updateData);
+
+		socket.emit('MessageFinishedChanging', updateData);
 	});
 };

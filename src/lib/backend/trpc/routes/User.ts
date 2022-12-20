@@ -21,7 +21,7 @@ export const user = t.router({
 			data: {
 				name: 'New User',
 				avatar: generateRandomAvatar(),
-				status: UserStatus.Invisible
+				status: UserStatus.Online
 			}
 		});
 

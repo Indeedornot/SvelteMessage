@@ -1,9 +1,10 @@
-import type { MessageApiData, MessageChangedData, MessageCreateApiData } from '../../../models';
+import type { MessageApiData, MessageChangedData, MessageCreateApiData, MessageUpdateApiData } from '../../../models';
 
 export interface MessageSTCEvents {
 	Message: (message: MessageApiData) => void; // Receive incoming messages and broadcast them
-	MessageChanged: (messageId: number, message: MessageChangedData) => void; // Receive incoming messages and broadcast them
+	MessageChanged: (messageId: number, message: MessageUpdateApiData) => void; // Receive incoming messages and broadcast them
 	MessageDeleted: (messageId: number) => void; // Receive incoming messages and broadcast them
+	MessageFinishedChanging: (message: MessageUpdateApiData) => void; // Receive incoming messages and broadcast them
 }
 
 export interface MessageCTSEvents {
