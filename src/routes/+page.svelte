@@ -2,9 +2,8 @@
 	import { browser } from '$app/environment';
 	import Chat from '$components/chat/Chat.svelte';
 	import { io } from '$lib/backend/socketio/socket-client';
-	import { addMessageListener } from '$lib/helpers/socketio/Messages';
-	import { addUserListener, goOnline } from '$lib/helpers/socketio/User';
-	import { MessageCache, UserStore, UsersCache } from '$lib/stores';
+	import { addChannelListener, addMessageListener, addUserListener, goOnline } from '$lib/helpers/backend';
+	import { UserStore } from '$lib/stores';
 	import { onDestroy, onMount } from 'svelte';
 
 	let canSend = false;
@@ -15,20 +14,14 @@
 	});
 
 	const setup = async () => {
-		await Promise.all([
-			UserStore.fetchUser().then(async (u) => {
-				await goOnline(u);
-			})
-		]);
+		await UserStore.fetch().then(async (u) => {
+			await goOnline(u);
+			canSend = true;
+		});
 
 		addUserListener();
 		addMessageListener();
-
-		UsersCache.fetch.users().then(() => {
-			MessageCache.fetchMessages().then(() => {
-				canSend = true;
-			});
-		});
+		addChannelListener();
 	};
 
 	onDestroy(() => {

@@ -1,18 +1,25 @@
 import type { UserData } from '../../models';
-import type { MessageCTSEvents, MessageSTCEvents } from './events/MessageEvents';
-import type { UserCTSEvents, UserSTCEvents } from './events/UserEvents';
+import type {
+	ChannelCTSEvents,
+	ChannelSTCEvents,
+	ChannelSTSEvents,
+	MessageCTSEvents,
+	MessageSTCEvents,
+	UserCTSEvents,
+	UserSTCEvents
+} from './events';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface InterServerEvents {}
+export interface InterServerEvents extends ChannelSTSEvents {}
 
 export interface SocketData {
 	user: UserData;
 }
 
-export interface ServerToClientEvents extends UserSTCEvents, MessageSTCEvents {
+export interface ServerToClientEvents extends UserSTCEvents, MessageSTCEvents, ChannelSTCEvents {
 	Connected: () => void; //Acknowledges a new connection
 }
 
-export interface ClientToServerEvents extends UserCTSEvents, MessageCTSEvents {
+export interface ClientToServerEvents extends UserCTSEvents, MessageCTSEvents, ChannelCTSEvents {
 	Connected: (user: UserData) => void; //Notifies of a new connection
 }

@@ -10,7 +10,7 @@
 	const refetchUser = async () => {
 		if (fetchingUser) return;
 		fetchingUser = true;
-		UserStore.fetchUser();
+		UserStore.fetch();
 		fetchingUser = false;
 	};
 </script>

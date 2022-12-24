@@ -20,14 +20,14 @@
 
 		if (isUpdating) return;
 		isUpdating = true;
-		await MessageCache.changeMessage(data.id, { text: text });
+		await MessageCache.crud.change(data.id, { text: text });
 		console.log('updated');
 
 		isUpdating = false;
 	};
 
 	const onRemove = () => {
-		MessageCache.removeMessage(data.id);
+		MessageCache.crud.remove(data.id);
 	};
 </script>
 

@@ -3,8 +3,9 @@ import { Server, Socket } from 'socket.io';
 
 import { UserScheme, UserStatus } from '../../models';
 import { prisma } from '../prisma/prisma';
-import { addMessageListener, addUserListener } from './events';
+import { addChannelListener, addMessageListener, addUserListener } from './events';
 import type { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from './socket-events';
+import { roomFromChannel, socketUtil } from './socketUtils';
 
 export type typedServer = Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
 export type typedSocket = Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
@@ -26,48 +27,68 @@ export async function injectSocketIO(server: any) {
 	io.on('connection', async (socket: typedSocket) => {
 		socket.on('Connected', async (user) => {
 			// Save the user data
-			console.log('Connected', user);
+			socketUtil.log('[Connected] Connected', user);
 
 			const parseData = UserScheme.safeParse(user);
 			if (!parseData.success) {
-				console.error('Invalid user data', parseData.error);
+				socketUtil.error('[Connected] Invalid user data');
 				return;
 			}
 
 			const userData = parseData.data;
-			const exists = await prisma.user.findUnique({
-				where: {
-					id: userData.id
-				}
-			});
+			const exists = await userExists(userData.id);
+
 			if (!exists) {
 				await prisma.user.create({
 					data: {
-						...userData //!!! This is not safe, but it's just a test project
+						...userData,
+						channels: {
+							connect: userData.channels.map((channel) => {
+								return { id: channel };
+							})
+						}
+						//!!! This is not safe, but it's just a test project
 					}
 				});
 			}
 
-			await prisma.user.update({
-				where: {
-					id: userData.id
-				},
-				data: {
-					online: true
-				}
-			});
+			makeOnline(user.id);
+
+			// socket.join(getRoomFromUser(userData.id));
+			// shouldn't be needed due to us calling socket.emit() for sender
+			userData.lastChannelId && socket.join(roomFromChannel(userData.lastChannelId));
+			addUserListener(io, socket);
+			addMessageListener(io, socket);
+			addChannelListener(io, socket);
 
 			socket.data.user = user;
 			socket.emit('Connected');
 			socket.broadcast.emit('UserOnline', user.id);
 		});
-
-		addUserListener(io, socket);
-		addMessageListener(io, socket);
 	});
 
-	console.log('SocketIO injected');
+	socketUtil.log('injected');
 }
+
+const makeOnline = async (userId: number) => {
+	await prisma.user.update({
+		where: {
+			id: userId
+		},
+		data: {
+			online: true
+		}
+	});
+};
+
+const userExists = async (userId: number) => {
+	const count = await prisma.user.count({
+		where: {
+			id: userId
+		}
+	});
+	return count !== 0;
+};
 
 /* EMIT CHEATSHEET
 // sending to sender-client only

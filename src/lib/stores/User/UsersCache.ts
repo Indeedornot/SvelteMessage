@@ -1,12 +1,29 @@
+import { getUserById } from '$lib/helpers/backend/User';
 import { updateRef } from '$lib/helpers/jsUtils';
-import { getUserById, getUsers } from '$lib/helpers/socketio/User';
-import type { UserData, UserUpdateData } from '$lib/models';
+import type { UserChangedData, UserData } from '$lib/models';
 import { derived, get, writable } from 'svelte/store';
 
-import { UserStore } from './UserCache';
+import { MessageCache } from '../MessageCache';
+
+const createLeftUsersStore = () => {
+	const { subscribe, set: setInternal, update } = writable<UserData[]>([]);
+
+	const crud = {
+		remove: (userId: number) => update((users) => users.filter((user) => user.id !== userId)),
+		set: (users: UserData[]) => setInternal(users),
+		clear: () => setInternal([])
+	};
+
+	return {
+		subscribe,
+		crud
+	};
+};
+
+export const LeftUsersStore = createLeftUsersStore();
 
 const createUsersStore = () => {
-	const { subscribe, set, update } = writable<UserData[]>([]);
+	const { subscribe, set: setInternal, update } = writable<UserData[]>([]);
 
 	const crud = {
 		add: (user: UserData) => {
@@ -18,7 +35,7 @@ const createUsersStore = () => {
 		remove: (userId: number) => {
 			update((users) => users.filter((user) => user.id !== userId));
 		},
-		update: (userId: number, data: UserUpdateData) => {
+		update: (userId: number, data: UserChangedData) => {
 			update((users) => {
 				const user = users.find((user) => user.id === userId);
 				if (!user) return users;
@@ -26,16 +43,21 @@ const createUsersStore = () => {
 				updateRef(user, data);
 				return users;
 			});
+
+			MessageCache.crud.causeUpdate();
 		},
 		addOrUpdate: (updateData: UserData) => {
 			update((users) => {
 				const user = users.find((u) => u.id === updateData.id);
 				if (!user) return [...users, updateData];
 				updateRef(user, updateData);
+				MessageCache.crud.causeUpdate();
 
 				return users;
 			});
-		}
+		},
+		set: (users: UserData[]) => setInternal(users),
+		clear: () => setInternal([])
 	};
 
 	const status = {
@@ -48,6 +70,8 @@ const createUsersStore = () => {
 
 				return users;
 			});
+
+			MessageCache.crud.causeUpdate();
 		},
 
 		setOnline: async (userId: number) => {
@@ -61,20 +85,12 @@ const createUsersStore = () => {
 				user.online = true;
 				return users;
 			});
+
+			MessageCache.crud.causeUpdate();
 		}
 	};
 
 	const fetch = {
-		users: async () => {
-			const users = await getUsers();
-			const currentUser = get(UserStore);
-			if (!currentUser) {
-				set(users);
-				return;
-			}
-
-			set(users.filter((user) => user.id !== currentUser.id));
-		},
 		user: async (userId: number) => {
 			const user = get(UsersCache).find((user) => user.id === userId);
 			if (!user) {
@@ -90,8 +106,6 @@ const createUsersStore = () => {
 
 	return {
 		subscribe,
-		set,
-		update,
 		crud,
 		status,
 		fetch
@@ -102,7 +116,6 @@ export const UsersCache = createUsersStore();
 
 export const createOnlineUsersStore = () => {
 	const { subscribe } = derived(UsersCache, ($users) => {
-		console.table($users);
 		const online: UserData[] = [];
 		const offline: UserData[] = [];
 

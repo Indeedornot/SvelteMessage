@@ -1,39 +1,23 @@
+import { changeMessage, deleteMessage } from '$lib/helpers/backend/Messages';
 import { updateRef } from '$lib/helpers/jsUtils';
-import { changeMessage, deleteMessage, getMessages } from '$lib/helpers/socketio/Messages';
 import type { MessageChangedData, MessageData, MessageUpdateApiData } from '$lib/models';
 import { get, writable } from 'svelte/store';
 
-import { UserStore, UsersCache } from './User';
-
 const createMessageStore = () => {
-	const { subscribe, set, update } = writable<MessageData[]>([]);
+	const { subscribe, set: setInternal, update } = writable<MessageData[]>([]);
 
 	//Since I use the reference to user on a MessageData,
 	//i need to manually send notification from store
-	UserStore.subscribe(() => {
-		update((messages) => {
-			return messages;
-		});
-	});
-
-	UsersCache.subscribe(() => {
-		update((messages) => {
-			return messages;
-		});
-	});
-
-	return {
-		subscribe,
-		set,
-		update,
-		addMessage: (message: MessageData) => update((messages) => [...messages, message]),
-		removeMessage: (messageId: number) => {
+	const crud = {
+		set: (messages: MessageData[]) => setInternal(messages),
+		add: (message: MessageData) => update((messages) => [...messages, message]),
+		remove: (messageId: number) => {
 			update((messages) => {
 				deleteMessage(messageId);
 				return messages.filter((message) => message.id !== messageId);
 			});
 		},
-		changeMessage: async (messageId: number, data: MessageChangedData) => {
+		change: async (messageId: number, data: MessageChangedData) => {
 			const message = get(MessageCache).find((message) => message.id === messageId);
 			if (!message) return;
 
@@ -44,7 +28,7 @@ const createMessageStore = () => {
 				return messages;
 			});
 		},
-		updateMessage: (messageId: number, data: MessageUpdateApiData) => {
+		update: (messageId: number, data: MessageUpdateApiData) => {
 			update((messages) => {
 				console.log('Msg UPT', messageId, data);
 
@@ -55,10 +39,13 @@ const createMessageStore = () => {
 				return messages;
 			});
 		},
-		fetchMessages: async () => {
-			const messages = await getMessages();
-			set(messages);
-		}
+		clear: () => setInternal([]),
+		causeUpdate: () => update((messages) => messages)
+	};
+
+	return {
+		subscribe,
+		crud
 	};
 };
 

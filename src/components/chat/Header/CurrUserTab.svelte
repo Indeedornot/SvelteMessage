@@ -1,7 +1,7 @@
 <script lang="ts">
 	import DropdownBase from '$components/helpers/Dropdown/DropdownBase.svelte';
 	import { getDifferentInObject, isEmptyObject } from '$lib/helpers/jsUtils';
-	import type { UserUpdateData } from '$lib/models';
+	import type { UserChangedData } from '$lib/models';
 	import { UserStore } from '$lib/stores';
 
 	import Avatar from '../Avatar.svelte';
@@ -31,13 +31,13 @@
 		if (!$UserStore) return;
 		isUpdating = true;
 
-		const sendData: UserUpdateData = getDifferentInObject($UserStore, updateData);
+		const sendData: UserChangedData = getDifferentInObject($UserStore, updateData);
 		if (isEmptyObject(sendData)) {
 			isUpdating = false;
 			return;
 		}
 
-		UserStore.updateUser(sendData).then(() => {
+		UserStore.crud.update(sendData).then(() => {
 			isUpdating = false;
 		});
 	};

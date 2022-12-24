@@ -35,3 +35,12 @@ export const getDifferentInObjectByKeys = <T extends K, K>(obj1: T, obj2: K, key
 export const isEmptyObject = (obj: any) => {
 	return Object.keys(obj).length === 0;
 };
+
+export const browserUtils = {
+	log: (...args: any[]) => {
+		console.log('[browser]', ...args);
+	},
+	error: (...args: any[]) => {
+		console.error('[browser]', ...args);
+	}
+};

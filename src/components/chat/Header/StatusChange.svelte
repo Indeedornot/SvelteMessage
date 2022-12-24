@@ -5,7 +5,7 @@
 
 	const updateStatus = (status: UserStatus) => {
 		if (status === $UserStore?.status) return;
-		UserStore.updateUser({ status });
+		UserStore.crud.update({ status });
 	};
 
 	let showTooltip = false;
@@ -16,7 +16,7 @@
 		options={{
 			fallbackPlacements: [],
 			placement: 'right-start',
-			offset: {x: 16, y: -3},
+			offset: { x: 16, y: -3 },
 			strategy: 'absolute'
 		}}
 		bind:showTooltip={showTooltip}

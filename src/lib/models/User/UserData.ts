@@ -1,13 +1,29 @@
-export type UserData = {
+import type { ChannelData } from '../Channel';
+
+export type BaseUserData = {
 	id: number;
 	name: string;
 	avatar: string;
 	status: UserStatus;
 	online: boolean;
+	lastChannelId: number | null;
+};
+
+export type UserData = BaseUserData & {
+	channels: number[];
+};
+
+export type CurrUserData = BaseUserData & {
+	channels: ChannelData[];
 };
 
 //without id and online since they are not updatable by the user
-export type UserUpdateData = Omit<Partial<UserData>, 'id' | 'online'>;
+export type UserChangedData = {
+	name?: string;
+	avatar?: string;
+	status?: UserStatus;
+	lastChannelId?: number | null;
+};
 
 export enum UserStatus {
 	Online = 'online',
