@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { dateSchema, idScheme } from '../Schemas';
-import { UserScheme } from '../User';
+import { UserScheme } from '../User/UserSchema';
 import { MessageConstr } from './MessageData';
 
 export const messageTextScheme = z.string().min(MessageConstr.text.minLength).max(MessageConstr.text.maxLength);

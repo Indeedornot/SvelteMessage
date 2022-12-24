@@ -127,6 +127,8 @@ export const fetchChannelByIdWithData = async (channelId: number) => {
 
 export const createChannel = async (data: ChannelCreateApiData): Promise<ChannelData> => {
 	const channel = await trpc().channel.create.query(data);
+	await joinNewChannel(channel.id);
+	UserStore.crud.channels.addObj(channel);
 	return channel;
 };
 

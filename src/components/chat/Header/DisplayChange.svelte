@@ -33,7 +33,6 @@
 				class="w-full break-all text-[14px] font-semibold leading-[18px] text-default outline-none"
 				contenteditable="true"
 				use:singleLine
-				disabled={isUpdating}
 				bind:textContent={newName}
 				use:maxLength={{ maxLength: UserConstr.name.maxLength }}
 			>

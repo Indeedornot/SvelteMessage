@@ -6,15 +6,20 @@ export type BaseUserData = {
 	avatar: string;
 	status: UserStatus;
 	online: boolean;
-	lastChannelId: number | null;
 };
 
 export type UserData = BaseUserData & {
 	channels: number[];
 };
 
+export type UserSocketData = BaseUserData & {
+	channels: number[];
+	lastChannelId: number | null;
+};
+
 export type CurrUserData = BaseUserData & {
 	channels: ChannelData[];
+	lastChannelId: number | null;
 };
 
 //without id and online since they are not updatable by the user
@@ -22,7 +27,6 @@ export type UserChangedData = {
 	name?: string;
 	avatar?: string;
 	status?: UserStatus;
-	lastChannelId?: number | null;
 };
 
 export enum UserStatus {

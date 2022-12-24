@@ -1,4 +1,4 @@
-import type { UserChangedData, UserData } from '../../../../models';
+import type { UserChangedData, UserSocketData } from '../../../../models';
 
 export interface UserSTCEvents {
 	UserOnline: (userId: number) => void; //Notifies of a user going online (saves data)
@@ -8,7 +8,7 @@ export interface UserSTCEvents {
 }
 
 export interface UserCTSEvents {
-	UserOnline: (data: UserData) => void; //Notifies of a client going online (saves data)
+	UserOnline: (data: UserSocketData) => void; //Notifies of a client going online (saves data)
 	UserOffline: () => void; //Notifies of a user going offline (server has the data stored already)
 	UserChanged: (data: UserChangedData) => void; //Sends a name change to the server
 }

@@ -1,11 +1,11 @@
 //Needs to use relative imports due to being processed in vite.config.js
 import { Server, Socket } from 'socket.io';
 
-import { UserScheme, UserStatus } from '../../models';
+import { UserSocketScheme, UserStatus } from '../../models';
 import { prisma } from '../prisma/prisma';
 import { addChannelListener, addMessageListener, addUserListener } from './events';
 import type { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from './socket-events';
-import { roomFromChannel, socketUtil } from './socketUtils';
+import { roomFromChannel, roomsFromChannels, roomsFromChannelsObj, socketUtil } from './socketUtils';
 
 export type typedServer = Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
 export type typedSocket = Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
@@ -29,7 +29,7 @@ export async function injectSocketIO(server: any) {
 			// Save the user data
 			socketUtil.log('[Connected] Connected', user);
 
-			const parseData = UserScheme.safeParse(user);
+			const parseData = UserSocketScheme.safeParse(user);
 			if (!parseData.success) {
 				socketUtil.error('[Connected] Invalid user data');
 				return;
@@ -37,22 +37,12 @@ export async function injectSocketIO(server: any) {
 
 			const userData = parseData.data;
 			const exists = await userExists(userData.id);
-
 			if (!exists) {
-				await prisma.user.create({
-					data: {
-						...userData,
-						channels: {
-							connect: userData.channels.map((channel) => {
-								return { id: channel };
-							})
-						}
-						//!!! This is not safe, but it's just a test project
-					}
-				});
+				socketUtil.error('[Connected] User does not exist');
+				return;
 			}
 
-			makeOnline(user.id);
+			await makeOnline(user.id);
 
 			// socket.join(getRoomFromUser(userData.id));
 			// shouldn't be needed due to us calling socket.emit() for sender
@@ -61,9 +51,12 @@ export async function injectSocketIO(server: any) {
 			addMessageListener(io, socket);
 			addChannelListener(io, socket);
 
-			socket.data.user = user;
+			socket.data.user = userData;
 			socket.emit('Connected');
-			socket.broadcast.emit('UserOnline', user.id);
+			socketUtil.log('[Connected] Connected', roomsFromChannels(userData.channels), user);
+			if (userData.channels.length > 0) {
+				socket.broadcast.to(roomsFromChannels(userData.channels)).emit('UserOnline', user.id);
+			}
 		});
 	});
 

@@ -1,4 +1,4 @@
-import type { UserData } from '../../models';
+import type { UserData, UserSocketData } from '../../models';
 import type {
 	ChannelCTSEvents,
 	ChannelSTCEvents,
@@ -13,7 +13,7 @@ import type {
 export interface InterServerEvents extends ChannelSTSEvents {}
 
 export interface SocketData {
-	user: UserData;
+	user: UserSocketData;
 }
 
 export interface ServerToClientEvents extends UserSTCEvents, MessageSTCEvents, ChannelSTCEvents {

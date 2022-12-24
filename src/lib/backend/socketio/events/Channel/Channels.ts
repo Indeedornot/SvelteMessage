@@ -2,7 +2,8 @@ import {
 	type ChannelChangedData,
 	type ChannelUpdateApiData,
 	ChannelUpdateApiScheme,
-	type UserData
+	type UserData,
+	type UserSocketData
 } from '../../../../models';
 import { prisma } from '../../../prisma/prisma';
 import type { typedServer, typedSocket } from '../../socket-handler';
@@ -135,7 +136,7 @@ const channelExists = async (id: number) => {
 	return (await prisma.channel.count({ where: { id } })) !== 0;
 };
 
-const updateLastChannel = async (user: UserData, channelId: number | null) => {
+const updateLastChannel = async (user: UserSocketData, channelId: number | null) => {
 	user.lastChannelId = channelId;
 	await prisma.user.update({
 		where: {
@@ -147,7 +148,7 @@ const updateLastChannel = async (user: UserData, channelId: number | null) => {
 	});
 };
 
-const leaveChannel = async (socket: typedSocket, user: UserData, channelId: number) => {
+const leaveChannel = async (socket: typedSocket, user: UserSocketData, channelId: number) => {
 	if (user.lastChannelId === channelId) {
 		updateLastChannel(user, null);
 	}
@@ -187,11 +188,10 @@ const joinNewChannel = async (socket: typedSocket, user: UserData, channelId: nu
 	});
 
 	socket.broadcast.to(roomFromChannel(channelId)).emit('ChannelNewJoined', user.id);
-	socket.join(roomFromChannel(channelId));
 	socketUtil.log('[joinChannel] Joined channel', channelId, socket.rooms);
 };
 
-const switchChannel = async (socket: typedSocket, user: UserData, channelId: number) => {
+const switchChannel = async (socket: typedSocket, user: UserSocketData, channelId: number) => {
 	if (user.lastChannelId !== null) {
 		socket.leave(roomFromChannel(user.lastChannelId));
 	}

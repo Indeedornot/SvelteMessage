@@ -1,7 +1,7 @@
 import { fetchChannelByIdWithData, getChannelById, joinNewChannel, switchChannel } from '$lib/helpers/backend/Channels';
-import { getSelfUser, updateUser, userToCurrUser } from '$lib/helpers/backend/User';
+import { getSelfUser, updateUser } from '$lib/helpers/backend/User';
 import { browserUtils, updateRef } from '$lib/helpers/jsUtils';
-import type { ChannelUpdateApiData, CurrUserData, UserChangedData } from '$lib/models';
+import type { ChannelData, ChannelUpdateApiData, CurrUserData, UserChangedData } from '$lib/models';
 import { get, writable } from 'svelte/store';
 
 import { MessageCache } from '../MessageCache';
@@ -60,6 +60,14 @@ const createUserStore = () => {
 
 				browserUtils.log('addedChannel', newChannel);
 				return true;
+			},
+			addObj: (channel: ChannelData) => {
+				update((user) => {
+					if (!user) return null;
+
+					user.channels = [...user.channels, channel];
+					return user;
+				});
 			},
 			remove: (channelId: number) => {
 				update((user) => {
@@ -125,10 +133,9 @@ const createUserStore = () => {
 		subscribe,
 		crud,
 		fetch: async () => {
-			const UserData = await getSelfUser();
-			const currUserData: CurrUserData = await userToCurrUser(UserData);
+			const currUserData: CurrUserData = await getSelfUser();
 			crud.set(currUserData);
-			return UserData;
+			return currUserData;
 		}
 	};
 };

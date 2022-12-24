@@ -1,10 +1,10 @@
 import { prisma } from '$lib/backend/prisma/prisma';
 import { generateRandomAvatar } from '$lib/helpers/RandomAvatar';
-import { UserScheme, UserStatus, idScheme } from '$lib/models';
+import { CurrUserScheme, UserScheme, UserStatus, idScheme } from '$lib/models';
 import { z } from 'zod';
 
 import { logger } from '../middleware/logger';
-import { t, trpcUtils } from '../t';
+import { t } from '../t';
 
 export const user = t.router({
 	getById: t.procedure
@@ -31,6 +31,21 @@ export const user = t.router({
 
 			return UserScheme.parse(returnData);
 		}),
+	getByIdWithData: t.procedure
+		.use(logger)
+		.input(idScheme)
+		.query(async ({ input }) => {
+			const user = await prisma.user.findUniqueOrThrow({
+				where: {
+					id: input
+				},
+				include: {
+					channels: true
+				}
+			});
+
+			return CurrUserScheme.parse(user);
+		}),
 	create: t.procedure.use(logger).query(async () => {
 		const user = await prisma.user.create({
 			data: {
@@ -39,20 +54,11 @@ export const user = t.router({
 				status: UserStatus.Online
 			},
 			include: {
-				channels: {
-					select: {
-						id: true
-					}
-				}
+				channels: true
 			}
 		});
 
-		return UserScheme.parse(user);
-	}),
-	getAll: t.procedure.use(logger).query(async () => {
-		const users = await prisma.user.findMany();
-
-		return z.array(UserScheme).parse(users);
+		return CurrUserScheme.parse(user);
 	}),
 	getAllByChannelId: t.procedure
 		.use(logger)

@@ -1,7 +1,7 @@
-import { UserChangedScheme, UserScheme } from '../../../../models';
+import { UserChangedScheme, UserSocketScheme } from '../../../../models';
 import { prisma } from '../../../prisma/prisma';
 import type { typedServer, typedSocket } from '../../socket-handler';
-import { roomsFromChannels, socketUtil } from '../../socketUtils';
+import { roomsFromChannelsObj, socketUtil } from '../../socketUtils';
 
 export const addUserListener = (io: typedServer, socket: typedSocket) => {
 	socket.on('UserOffline', async () => {
@@ -35,14 +35,14 @@ export const addUserListener = (io: typedServer, socket: typedSocket) => {
 			}
 		});
 
-		socket.broadcast.to(roomsFromChannels(userUpdate.channels)).emit('UserOffline', user.id);
+		socket.broadcast.to(roomsFromChannelsObj(userUpdate.channels)).emit('UserOffline', user.id);
 		socket.data.user = undefined;
 	};
 
 	socket.on('UserOnline', async (user) => {
 		socketUtil.log('[UserOnline]');
 		// Add the user to the list of connected users
-		const parseData = UserScheme.safeParse(user);
+		const parseData = UserSocketScheme.safeParse(user);
 		if (!parseData.success) {
 			socketUtil.error('[UserOnline] Invalid user data');
 			return;
@@ -67,7 +67,7 @@ export const addUserListener = (io: typedServer, socket: typedSocket) => {
 		});
 
 		socket.data.user = user;
-		socket.broadcast.to(roomsFromChannels(userUpdate.channels)).emit('UserOnline', userData.id);
+		socket.broadcast.to(roomsFromChannelsObj(userUpdate.channels)).emit('UserOnline', userData.id);
 	});
 
 	socket.on('UserChanged', async (data) => {
@@ -103,7 +103,7 @@ export const addUserListener = (io: typedServer, socket: typedSocket) => {
 			}
 		});
 
-		socket.broadcast.to(roomsFromChannels(userUpdate.channels)).emit('UserChanged', user.id, data);
+		socket.broadcast.to(roomsFromChannelsObj(userUpdate.channels)).emit('UserChanged', user.id, data);
 		socket.emit('UserFinishedChanging', data);
 	});
 };

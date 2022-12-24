@@ -3,7 +3,7 @@
 	import type { MessageCreateApiData } from '$lib/models/Message/MessageData';
 	import { MessageCache, UserStore } from '$lib/stores';
 
-	import Channels from './Channels.svelte';
+	import Channels from './Channels/Channels.svelte';
 	import Header from './Header/Header.svelte';
 	import Message from './Message/Message.svelte';
 	import OnlineUsers from './OnlineUsers.svelte';
