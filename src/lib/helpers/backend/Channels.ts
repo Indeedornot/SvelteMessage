@@ -52,7 +52,7 @@ export const switchChannel = (channelId: number): Promise<void> => {
 	});
 };
 
-/** Does not set lastChannelId */
+/** Does not set currChannelId */
 export const joinNewChannel = (channelId: number): Promise<void> => {
 	return new Promise((resolve, reject) => {
 		const user = get(UserStore);
@@ -69,7 +69,7 @@ export const joinNewChannel = (channelId: number): Promise<void> => {
 	});
 };
 
-/** Handles lastChannelId */
+/** Handles currChannelId */
 export const leaveChannel = (channelId: number): Promise<void> => {
 	return new Promise((resolve, reject) => {
 		const user = get(UserStore);
@@ -121,7 +121,8 @@ export const fetchChannelByIdWithData = async (channelId: number) => {
 	return {
 		left: leftUsers,
 		messages: MessagesData,
-		users: channel.users
+		users: channel.users,
+		ownerId: channel.ownerId
 	};
 };
 

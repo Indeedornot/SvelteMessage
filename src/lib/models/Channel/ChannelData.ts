@@ -1,4 +1,4 @@
-import type { MessageData } from '../Message';
+import type { MessageApiData, MessageData } from '../Message';
 import type { UserData } from '../User';
 
 export type ChannelData = {
@@ -7,11 +7,13 @@ export type ChannelData = {
 	avatar: string;
 	createdAt: Date;
 	updatedAt: Date;
+	ownerId: number;
 };
 
 export type ChannelCreateApiData = {
 	avatar: string;
 	name: string;
+	creatorId: number;
 };
 
 export type ChannelChangedData = {
@@ -32,7 +34,9 @@ export type ChannelApiData = {
 
 	users: UserData[];
 
-	messages: MessageData[];
+	messages: MessageApiData[];
+
+	ownerId: number;
 
 	createdAt: Date;
 	updatedAt: Date;

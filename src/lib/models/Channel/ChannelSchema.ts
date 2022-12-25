@@ -1,42 +1,3 @@
-/*
-export type ChannelData = {
-	id: number;
-	name: string;
-	avatar: string;
-	createdAt: Date;
-	updatedAt: Date;
-};
-
-export type ChannelCreateApiData = {
-	avatar?: string;
-	name: string;
-};
-
-export type ChannelChangedData = {
-	avatar?: string;
-	name?: string;
-};
-
-export type ChannelUpdateApiData = {
-	name?: string;
-	avatar?: string;
-	updatedAt: Date;
-};
-
-export type ChannelApiData = {
-	id: number;
-	name: string;
-	avatar: string;
-
-	users: UserData[];
-
-	messages: MessageData[];
-
-	createdAt: Date;
-	updatedAt: Date;
-};
-
-*/
 import { z } from 'zod';
 
 import { MessageApiScheme } from '../Message';
@@ -51,7 +12,8 @@ export const ChannelScheme = z.object({
 	name: channelNameSchema,
 	avatar: avatarSchema,
 	createdAt: dateSchema,
-	updatedAt: dateSchema
+	updatedAt: dateSchema,
+	ownerId: idScheme
 });
 
 export const ChannelApiScheme = ChannelScheme.extend({
@@ -61,7 +23,8 @@ export const ChannelApiScheme = ChannelScheme.extend({
 
 export const ChannelCreateApiScheme = z.object({
 	name: channelNameSchema,
-	avatar: avatarSchema
+	avatar: avatarSchema,
+	creatorId: idScheme
 });
 
 export const ChannelChangedScheme = z

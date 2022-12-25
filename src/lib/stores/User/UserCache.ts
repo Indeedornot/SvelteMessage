@@ -20,8 +20,8 @@ const createUserStore = () => {
 			}
 
 			//set last channel
-			if (user.lastChannelId) {
-				crud.lastChannelId.set(user.lastChannelId);
+			if (user.currChannel?.id) {
+				crud.currChannel.set(user.currChannel.id);
 			}
 		},
 		update: async (data: UserChangedData) => {
@@ -74,8 +74,8 @@ const createUserStore = () => {
 					if (!user) return null;
 
 					user.channels = user.channels.filter((channel) => channel.id !== channelId);
-					if (channelId === user.lastChannelId) {
-						user.lastChannelId = null;
+					if (channelId === user.currChannel?.id) {
+						user.currChannel = null;
 						UsersCache.crud.clear();
 						LeftUsersStore.crud.clear();
 						MessageCache.crud.clear();
@@ -96,7 +96,7 @@ const createUserStore = () => {
 				});
 			}
 		},
-		lastChannelId: {
+		currChannel: {
 			update: async (channelId: number) => {
 				//handles a null check
 				await switchChannel(channelId);
@@ -112,7 +112,10 @@ const createUserStore = () => {
 				update((user) => {
 					if (!user) return null;
 
-					user.lastChannelId = channel ? channelId : user.lastChannelId;
+					user.currChannel = {
+						id: channelId,
+						owner: channel.ownerId === user.id
+					};
 					return user;
 				});
 

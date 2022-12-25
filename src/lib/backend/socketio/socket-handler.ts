@@ -46,7 +46,7 @@ export async function injectSocketIO(server: any) {
 
 			// socket.join(getRoomFromUser(userData.id));
 			// shouldn't be needed due to us calling socket.emit() for sender
-			userData.lastChannelId && socket.join(roomFromChannel(userData.lastChannelId));
+			userData.currChannel && socket.join(roomFromChannel(userData.currChannel.id));
 			addUserListener(io, socket);
 			addMessageListener(io, socket);
 			addChannelListener(io, socket);

@@ -1,5 +1,12 @@
 import { prisma } from '$lib/backend/prisma/prisma';
-import { ChannelApiScheme, ChannelCreateApiScheme, ChannelScheme, idScheme } from '$lib/models';
+import {
+	type ChannelApiData,
+	ChannelApiScheme,
+	ChannelCreateApiScheme,
+	type ChannelData,
+	ChannelScheme,
+	idScheme
+} from '$lib/models';
 import { z } from 'zod';
 
 import { logger } from '../middleware/logger';
@@ -22,25 +29,55 @@ export const channel = t.router({
 				include: {
 					messages: {
 						take: input.messageCount,
-						orderBy: { createdAt: 'desc' }
+						orderBy: { createdAt: 'desc' },
+						include: {
+							sender: {
+								select: {
+									id: true
+								}
+							}
+						}
 					},
 					users: {
-						include: {
-							channels: { select: { id: true } }
+						select: {
+							user: {
+								include: {
+									channelUser: {
+										select: {
+											channel: {
+												select: {
+													id: true
+												}
+											}
+										}
+									}
+								}
+							}
 						}
 					}
 				}
 			});
+
 			channel.messages.reverse();
 			trpcUtils.log(channel.messages);
 
-			const returnData = {
+			const returnData: ChannelApiData = {
 				...channel,
-				users: channel.users.map((user) => {
+				messages: channel.messages.map((message) => {
 					return {
-						...user,
+						...message,
+						senderId: message.sender.id
+					};
+				}),
+				users: channel.users.map((x) => {
+					return {
+						id: x.user.id,
+						name: x.user.name,
+						avatar: x.user.avatar,
+						online: x.user.online,
+						status: x.user.status as any,
 						//flatten from [{id: 1}, {id: 2}] to [1, 2]
-						channels: user.channels.map((channel) => channel.id)
+						channels: x.user.channelUser.map((y) => y.channel.id)
 					};
 				})
 			};
@@ -55,8 +92,18 @@ export const channel = t.router({
 				where: { id: input }
 			});
 
-			const parseData = ChannelScheme.safeParse(channel);
+			const returnData: ChannelData = {
+				avatar: channel.avatar,
+				createdAt: channel.createdAt,
+				id: channel.id,
+				name: channel.name,
+				ownerId: channel.ownerId,
+				updatedAt: channel.updatedAt
+			};
+
+			const parseData = ChannelScheme.safeParse(returnData);
 			if (!parseData.success) {
+				console.error(parseData.error);
 				return null;
 			}
 
@@ -66,13 +113,19 @@ export const channel = t.router({
 		.use(logger)
 		.input(idScheme)
 		.query(async ({ input }) => {
-			const channels = await prisma.user
-				.findUniqueOrThrow({
-					where: { id: input }
-				})
-				.channels();
+			const channels = await prisma.user.findUniqueOrThrow({
+				where: { id: input },
+				include: {
+					channelUser: {
+						select: {
+							channel: true
+						}
+					}
+				}
+			});
 
-			return z.array(ChannelScheme).parse(channels);
+			const returnData: ChannelData[] = channels.channelUser.map((x) => x.channel);
+			return z.array(ChannelScheme).parse(returnData);
 		}),
 	create: t.procedure
 		.use(logger)
@@ -80,7 +133,10 @@ export const channel = t.router({
 		.query(async ({ input }) => {
 			const channel = await prisma.channel.create({
 				data: {
-					...input
+					name: input.name,
+					avatar: input.avatar,
+					ownerId: input.creatorId,
+					creatorId: input.creatorId
 				}
 			});
 

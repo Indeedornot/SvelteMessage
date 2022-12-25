@@ -15,8 +15,8 @@ export const roomFromUser = (userId: number) => {
 	return `User-${userId}`;
 };
 
-export const roomsFromChannelsObj = (channels: { id: number }[]) => {
-	return channels.map((channel) => roomFromChannel(channel.id));
+export const roomsFromChannelsObj = (channels: { channel: { id: number } }[]) => {
+	return channels.map((channel) => roomFromChannel(channel.channel.id));
 };
 
 export const roomsFromChannels = (channels: number[]) => {

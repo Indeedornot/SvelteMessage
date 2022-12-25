@@ -1,6 +1,6 @@
 import { prisma } from '$lib/backend/prisma/prisma';
 import { generateRandomAvatar } from '$lib/helpers/RandomAvatar';
-import { CurrUserScheme, UserScheme, UserStatus, idScheme } from '$lib/models';
+import { type CurrUserData, CurrUserScheme, type UserData, UserScheme, UserStatus, idScheme } from '$lib/models';
 import { z } from 'zod';
 
 import { logger } from '../middleware/logger';
@@ -16,9 +16,13 @@ export const user = t.router({
 					id: input
 				},
 				include: {
-					channels: {
+					channelUser: {
 						select: {
-							id: true
+							channel: {
+								select: {
+									id: true
+								}
+							}
 						}
 					}
 				}
@@ -26,7 +30,7 @@ export const user = t.router({
 
 			const returnData = {
 				...user,
-				channels: user.channels.map((channel) => channel.id)
+				channels: user.channelUser.map((x) => x.channel.id)
 			};
 
 			return UserScheme.parse(returnData);
@@ -40,25 +44,63 @@ export const user = t.router({
 					id: input
 				},
 				include: {
-					channels: true
+					channelUser: {
+						select: {
+							channel: true
+						}
+					},
+					owned: {
+						select: {
+							id: true
+						}
+					},
+					currChannel: {
+						select: {
+							id: true,
+							owner: {
+								select: {
+									id: true
+								}
+							}
+						}
+					}
 				}
 			});
 
-			return CurrUserScheme.parse(user);
+			const returnData: CurrUserData = {
+				...user,
+				status: user.status as any,
+				channels: user.channelUser.map((x) => x.channel),
+				currChannel: user.currChannel
+					? {
+							id: user.currChannel.id,
+							owner: user.currChannel.owner.id === user.id
+					  }
+					: null,
+				owned: user.owned.map((x) => x.id)
+			};
+
+			return CurrUserScheme.parse(returnData);
 		}),
 	create: t.procedure.use(logger).query(async () => {
 		const user = await prisma.user.create({
 			data: {
 				name: 'New User',
 				avatar: generateRandomAvatar(),
-				status: UserStatus.Online
-			},
-			include: {
-				channels: true
+				status: UserStatus.Online,
+				currChannelId: undefined
 			}
 		});
 
-		return CurrUserScheme.parse(user);
+		const returnData: CurrUserData = {
+			...user,
+			status: user.status as any,
+			channels: [],
+			owned: [],
+			currChannel: null
+		};
+
+		return CurrUserScheme.parse(returnData);
 	}),
 	getAllByChannelId: t.procedure
 		.use(logger)
@@ -66,14 +108,33 @@ export const user = t.router({
 		.query(async ({ input }) => {
 			const users = await prisma.user.findMany({
 				where: {
-					channels: {
+					channelUser: {
 						some: {
-							id: input
+							channelId: input
+						}
+					}
+				},
+				include: {
+					channelUser: {
+						select: {
+							channel: {
+								select: {
+									id: true
+								}
+							}
 						}
 					}
 				}
 			});
 
-			return z.array(UserScheme).parse(users);
+			const returnData: UserData[] = users.map((user) => {
+				return {
+					...user,
+					status: user.status as any,
+					channels: user.channelUser.map((x) => x.channel.id)
+				};
+			});
+
+			return z.array(UserScheme).parse(returnData);
 		})
 });

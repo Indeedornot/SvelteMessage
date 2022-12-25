@@ -10,9 +10,9 @@
 
 	let switching = false;
 	const switchChannel = async (id: number) => {
-		if (switching || $UserStore?.lastChannelId === id) return;
+		if (switching || $UserStore?.currChannel?.id === id) return;
 		switching = true;
-		await UserStore.crud.lastChannelId.update(id);
+		await UserStore.crud.currChannel.update(id);
 		switching = false;
 	};
 </script>

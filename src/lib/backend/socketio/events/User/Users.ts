@@ -27,15 +27,17 @@ export const addUserListener = (io: typedServer, socket: typedSocket) => {
 				online: false
 			},
 			include: {
-				channels: {
+				channelUser: {
 					select: {
-						id: true
+						channel: {
+							select: { id: true }
+						}
 					}
 				}
 			}
 		});
 
-		socket.broadcast.to(roomsFromChannelsObj(userUpdate.channels)).emit('UserOffline', user.id);
+		socket.broadcast.to(roomsFromChannelsObj(userUpdate.channelUser)).emit('UserOffline', user.id);
 		socket.data.user = undefined;
 	};
 
@@ -58,16 +60,18 @@ export const addUserListener = (io: typedServer, socket: typedSocket) => {
 				online: true
 			},
 			include: {
-				channels: {
+				channelUser: {
 					select: {
-						id: true
+						channel: {
+							select: { id: true }
+						}
 					}
 				}
 			}
 		});
 
 		socket.data.user = user;
-		socket.broadcast.to(roomsFromChannelsObj(userUpdate.channels)).emit('UserOnline', userData.id);
+		socket.broadcast.to(roomsFromChannelsObj(userUpdate.channelUser)).emit('UserOnline', userData.id);
 	});
 
 	socket.on('UserChanged', async (data) => {
@@ -95,15 +99,17 @@ export const addUserListener = (io: typedServer, socket: typedSocket) => {
 				...parsedData.data
 			},
 			include: {
-				channels: {
+				channelUser: {
 					select: {
-						id: true
+						channel: {
+							select: { id: true }
+						}
 					}
 				}
 			}
 		});
 
-		socket.broadcast.to(roomsFromChannelsObj(userUpdate.channels)).emit('UserChanged', user.id, data);
+		socket.broadcast.to(roomsFromChannelsObj(userUpdate.channelUser)).emit('UserChanged', user.id, data);
 		socket.emit('UserFinishedChanging', data);
 	});
 };

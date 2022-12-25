@@ -38,11 +38,13 @@ export const addChannelListener = (io: typedServer, socket: typedSocket) => {
 			include: {
 				users: {
 					select: {
-						id: true
+						userId: true
 					},
 					where: {
-						id: { not: user.id },
-						online: true
+						userId: { not: user.id },
+						user: {
+							online: true
+						}
 					}
 				}
 			}
@@ -54,7 +56,7 @@ export const addChannelListener = (io: typedServer, socket: typedSocket) => {
 		};
 
 		channel.users.forEach((user) => {
-			io.to(roomFromUser(user.id)).emit('ChannelChanged', channelId, returnData);
+			io.to(roomFromUser(user.userId)).emit('ChannelChanged', channelId, returnData);
 		});
 		socket.emit('ChannelFinishedChanging', returnData);
 	});
@@ -124,7 +126,7 @@ export const addChannelListener = (io: typedServer, socket: typedSocket) => {
 
 		socketUtil.log('[ChannelSwitch] Switching channel', {
 			id: channelId,
-			last: user.lastChannelId,
+			last: user.currChannel?.id,
 			rooms: socket.rooms
 		});
 		switchChannel(socket, user, channelId);
@@ -137,31 +139,48 @@ const channelExists = async (id: number) => {
 };
 
 const updateLastChannel = async (user: UserSocketData, channelId: number | null) => {
-	user.lastChannelId = channelId;
-	await prisma.user.update({
+	const updated = await prisma.user.update({
 		where: {
 			id: user.id
 		},
 		data: {
-			lastChannelId: channelId
+			currChannel: channelId ? { connect: { id: channelId } } : { disconnect: true }
+		},
+		include: {
+			currChannel: {
+				select: {
+					id: true,
+					owner: {
+						select: {
+							id: true
+						}
+					}
+				}
+			}
 		}
 	});
+	if (!channelId) {
+		user.currChannel = null;
+		return;
+	}
+
+	user.currChannel = {
+		id: channelId,
+		owner: updated?.currChannel?.owner.id === user.id
+	};
 };
 
 const leaveChannel = async (socket: typedSocket, user: UserSocketData, channelId: number) => {
-	if (user.lastChannelId === channelId) {
+	if (user.currChannel?.id === channelId) {
 		updateLastChannel(user, null);
 	}
+
 	user.channels = user.channels.filter((channel) => channel !== channelId);
-	await prisma.user.update({
+	await prisma.channelUser.delete({
 		where: {
-			id: user.id
-		},
-		data: {
-			channels: {
-				disconnect: {
-					id: channelId
-				}
+			channelId_userId: {
+				channelId,
+				userId: user.id
 			}
 		}
 	});
@@ -174,14 +193,16 @@ const leaveChannel = async (socket: typedSocket, user: UserSocketData, channelId
 
 const joinNewChannel = async (socket: typedSocket, user: UserData, channelId: number) => {
 	user.channels.push(channelId);
-	await prisma.user.update({
-		where: {
-			id: user.id
-		},
+	await prisma.channelUser.create({
 		data: {
-			channels: {
+			channel: {
 				connect: {
 					id: channelId
+				}
+			},
+			user: {
+				connect: {
+					id: user.id
 				}
 			}
 		}
@@ -192,8 +213,8 @@ const joinNewChannel = async (socket: typedSocket, user: UserData, channelId: nu
 };
 
 const switchChannel = async (socket: typedSocket, user: UserSocketData, channelId: number) => {
-	if (user.lastChannelId !== null) {
-		socket.leave(roomFromChannel(user.lastChannelId));
+	if (user.currChannel?.id) {
+		socket.leave(roomFromChannel(user.currChannel.id));
 	}
 
 	updateLastChannel(user, channelId);

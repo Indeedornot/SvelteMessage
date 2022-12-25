@@ -14,12 +14,20 @@ export type UserData = BaseUserData & {
 
 export type UserSocketData = BaseUserData & {
 	channels: number[];
-	lastChannelId: number | null;
+	currChannel: {
+		id: number;
+		owner: boolean;
+	} | null;
+	owned: number[];
 };
 
 export type CurrUserData = BaseUserData & {
 	channels: ChannelData[];
-	lastChannelId: number | null;
+	currChannel: {
+		id: number;
+		owner: boolean;
+	} | null;
+	owned: number[];
 };
 
 //without id and online since they are not updatable by the user

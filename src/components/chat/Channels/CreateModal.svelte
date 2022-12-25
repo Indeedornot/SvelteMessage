@@ -3,6 +3,7 @@
 	import { generateRandomAvatar } from '$lib/helpers/RandomAvatar';
 	import { createChannel as createChannelApi } from '$lib/helpers/backend/Channels';
 	import { avatarSchema } from '$lib/models';
+	import { UserStore } from '$lib/stores';
 
 	import Avatar from '../Avatar.svelte';
 
@@ -20,8 +21,14 @@
 
 	const createChannel = async () => {
 		if (create.pending) return;
+		const currUser = $UserStore;
+		if (!currUser) return;
+
 		create.pending = true;
-		await createChannelApi(create.data);
+		await createChannelApi({
+			...create.data,
+			creatorId: currUser.id
+		});
 		create.pending = false;
 	};
 </script>

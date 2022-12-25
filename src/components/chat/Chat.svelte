@@ -26,7 +26,7 @@
 	<div class="flex min-h-0 w-full flex-grow flex-row">
 		<Channels />
 		<div class="flex h-full min-w-0 flex-grow bg-default">
-			{#if $UserStore?.lastChannelId !== null}
+			{#if $UserStore?.currChannel?.id}
 				<div class="flex min-w-0 flex-grow flex-col bg-default">
 					<div class="messages flex min-h-0 w-full flex-grow flex-col">
 						{#each $MessageCache as message (message.id)}

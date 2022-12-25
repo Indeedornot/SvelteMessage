@@ -9,8 +9,8 @@ export const addMessageListener = (io: typedServer, socket: typedSocket) => {
 		socketUtil.log('[Message] Message received');
 
 		const user = socket.data.user;
-		if (!user?.lastChannelId) {
-			socketUtil.error('[Message] User not found');
+		if (!user?.currChannel?.id) {
+			socketUtil.error('[Message] User not found', user);
 			return;
 		}
 
@@ -32,19 +32,21 @@ export const addMessageListener = (io: typedServer, socket: typedSocket) => {
 				},
 				channel: {
 					connect: {
-						id: user.lastChannelId
+						id: user.currChannel.id
 					}
 				}
 			}
 		});
 
-		socketUtil.log('[Message] Message created', message, roomFromChannel(user.lastChannelId), socket.rooms);
-		io.to(roomFromChannel(user.lastChannelId)).emit('Message', message);
+		socketUtil.log('[Message] Message created', message, roomFromChannel(user.currChannel.id), socket.rooms);
+		io.to(roomFromChannel(user.currChannel.id)).emit('Message', message);
 	});
 
 	socket.on('MessageDeleted', async (messageId) => {
 		const user = socket.data.user;
-		if (!user?.lastChannelId) return;
+		if (!user?.currChannel) {
+			return;
+		}
 
 		const message = await prisma.message.findUnique({
 			where: {
@@ -54,7 +56,7 @@ export const addMessageListener = (io: typedServer, socket: typedSocket) => {
 
 		if (!message) return;
 
-		if (message.senderId !== user.id) return;
+		if (message.senderId !== user.id && !user.currChannel.owner) return;
 
 		await prisma.message.delete({
 			where: {
@@ -62,13 +64,13 @@ export const addMessageListener = (io: typedServer, socket: typedSocket) => {
 			}
 		});
 
-		socket.broadcast.to(roomFromChannel(user.lastChannelId)).emit('MessageDeleted', messageId);
+		socket.broadcast.to(roomFromChannel(user.currChannel.id)).emit('MessageDeleted', messageId);
 	});
 
 	socket.on('MessageChanged', async (messageId, data) => {
 		socketUtil.log('[MessageChanged] Message changed', messageId, data);
 		const user = socket.data.user;
-		if (!user?.lastChannelId) {
+		if (!user?.currChannel?.id) {
 			socketUtil.error('[MessageChanged] User not in channel');
 			return;
 		}
@@ -102,7 +104,7 @@ export const addMessageListener = (io: typedServer, socket: typedSocket) => {
 			updatedAt: updatedAt
 		};
 
-		socket.broadcast.to(roomFromChannel(user.lastChannelId)).emit('MessageChanged', messageId, updateData);
+		socket.broadcast.to(roomFromChannel(user.currChannel.id)).emit('MessageChanged', messageId, updateData);
 		socket.emit('MessageFinishedChanging', updateData);
 	});
 };
