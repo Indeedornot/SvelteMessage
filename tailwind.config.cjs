@@ -31,7 +31,8 @@ module.exports = {
 			'icon-bg': 'rgb(var(--color-fg-icon-bg) / <alpha-value>)',
 			emphasis: 'rgb(var(--color-fg-emphasis) / <alpha-value>)',
 			accent: 'rgb(var(--color-fg-accent) / <alpha-value>)',
-			anchor: 'rgb(var(--color-fg-anchor) / <alpha-value>)'
+			anchor: 'rgb(var(--color-fg-anchor) / <alpha-value>)',
+			disabled: 'rgb(var(--color-fg-disabled) / <alpha-value>)'
 		},
 		caretColor: {
 			default: 'rgb(var(--color-caret-default) / <alpha-value>)'

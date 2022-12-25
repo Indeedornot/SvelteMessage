@@ -29,6 +29,12 @@
 	});
 </script>
 
+<svelte:body
+	on:contextmenu={(e) => {
+		// Prevent the context menu from opening
+		e.preventDefault();
+	}}
+/>
 <div class="flex h-full w-full flex-none items-center justify-center">
 	<div class="h-[775px] w-[650px]">
 		<Chat canSend={canSend} />

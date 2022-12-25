@@ -21,6 +21,7 @@
 
     --color-fg-default: 220 221 222;
     --color-fg-muted: 114 118 125;
+    --color-fg-disabled: 70 74 80;
     --color-fg-icon-bg: 64 68 75;
     --color-fg-icon: 220 221 222;
     --color-fg-emphasis: 255 255 255;
