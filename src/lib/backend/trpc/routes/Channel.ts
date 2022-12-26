@@ -9,6 +9,7 @@ import {
 } from '$lib/models';
 import { z } from 'zod';
 
+import { mapRoles } from '../../prisma/helpers';
 import { logger } from '../middleware/logger';
 import { t, trpcUtils } from '../t';
 
@@ -56,6 +57,20 @@ export const channel = t.router({
 								}
 							}
 						}
+					},
+					roles: true
+				}
+			});
+
+			const messages = await prisma.message.findMany({
+				where: {
+					channelId: input.id
+				},
+				include: {
+					sender: {
+						select: {
+							id: true
+						}
 					}
 				}
 			});
@@ -77,11 +92,12 @@ export const channel = t.router({
 						name: x.user.name,
 						avatar: x.user.avatar,
 						online: x.user.online,
-						status: x.user.status as any,
+						status: x.user.status as never,
 						//flatten from [{id: 1}, {id: 2}] to [1, 2]
 						channels: x.user.channelUser.map((y) => y.channel.id)
 					};
-				})
+				}),
+				roles: mapRoles(channel.roles)
 			};
 
 			return ChannelApiScheme.parse(returnData);
@@ -91,7 +107,10 @@ export const channel = t.router({
 		.input(idScheme)
 		.query(async ({ input }) => {
 			const channel = await prisma.channel.findUnique({
-				where: { id: input }
+				where: { id: input },
+				include: {
+					roles: true
+				}
 			});
 
 			if (!channel) {
@@ -99,12 +118,8 @@ export const channel = t.router({
 			}
 
 			const returnData: ChannelData = {
-				avatar: channel.avatar,
-				createdAt: channel.createdAt,
-				id: channel.id,
-				name: channel.name,
-				ownerId: channel.ownerId,
-				updatedAt: channel.updatedAt
+				...channel,
+				roles: mapRoles(channel.roles)
 			};
 
 			const parseData = ChannelScheme.safeParse(returnData);
@@ -124,13 +139,22 @@ export const channel = t.router({
 				include: {
 					channelUser: {
 						select: {
-							channel: true
+							channel: {
+								include: {
+									roles: true
+								}
+							}
 						}
 					}
 				}
 			});
 
-			const returnData: ChannelData[] = channels.channelUser.map((x) => x.channel);
+			const returnData: ChannelData[] = channels.channelUser.map((x) => {
+				return {
+					...x.channel,
+					roles: mapRoles(x.channel.roles)
+				};
+			});
 			return z.array(ChannelScheme).parse(returnData);
 		}),
 	create: t.procedure
@@ -146,7 +170,7 @@ export const channel = t.router({
 				}
 			});
 
-			return ChannelScheme.parse(channel);
+			return ChannelScheme.parse({ ...channel, roles: [] });
 		}),
 	delete: t.procedure
 		.use(logger)

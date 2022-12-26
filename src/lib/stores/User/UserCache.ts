@@ -124,12 +124,13 @@ const createUserStore = () => {
 
 					user.currChannel = {
 						id: channelId,
-						owner: channel.ownerId === user.id
+						owner: channel.ownerId === user.id,
+						roles: channel.roles
 					};
+					console.log('last channel id updated', user.currChannel);
+
 					return user;
 				});
-
-				console.log('last channel id updated');
 			},
 			set: async (channelId: number) => {
 				const channel = await fetchChannelByIdWithData(channelId);

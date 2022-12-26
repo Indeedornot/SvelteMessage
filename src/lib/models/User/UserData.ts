@@ -1,4 +1,5 @@
 import type { ChannelData } from '../Channel';
+import type { RoleData } from '../Role/RoleData';
 
 export type BaseUserData = {
 	id: number;
@@ -12,20 +13,21 @@ export type UserData = BaseUserData & {
 	channels: number[];
 };
 
-type CurrChannel = {
+export type CurrChannelData = {
 	id: number;
 	owner: boolean;
+	roles: RoleData[];
 } | null;
 
 export type UserSocketData = BaseUserData & {
 	channels: number[];
-	currChannel: CurrChannel;
+	currChannel: CurrChannelData;
 	owned: number[];
 };
 
 export type CurrUserData = BaseUserData & {
 	channels: ChannelData[];
-	currChannel: CurrChannel;
+	currChannel: CurrChannelData;
 	owned: number[];
 };
 

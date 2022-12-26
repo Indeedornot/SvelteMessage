@@ -1,16 +1,19 @@
 export type RoleData = {
 	id: number;
+	order: number;
 	name: string;
 	permissions: number[];
 };
 
 export type RoleCreateApiData = {
 	name: string;
+	order?: number; //default is end
 	permissions: number[];
 };
 
 export type RoleChangedData = {
 	name?: string;
+	order?: number;
 	permissions?: number[];
 };
 

@@ -5,6 +5,7 @@ import {
 	type UserData,
 	type UserSocketData
 } from '../../../../models';
+import { mapRoles } from '../../../prisma/helpers';
 import { prisma } from '../../../prisma/prisma';
 import type { typedServer, typedSocket } from '../../socket-handler';
 import { roomFromChannel, roomFromUser, socketUtil } from '../../socketUtils';
@@ -154,7 +155,8 @@ const updateLastChannel = async (user: UserSocketData, channelId: number | null)
 						select: {
 							id: true
 						}
-					}
+					},
+					roles: true
 				}
 			}
 		}
@@ -166,7 +168,8 @@ const updateLastChannel = async (user: UserSocketData, channelId: number | null)
 
 	user.currChannel = {
 		id: channelId,
-		owner: updated?.currChannel?.owner.id === user.id
+		owner: updated?.currChannel?.owner.id === user.id,
+		roles: mapRoles(updated?.currChannel?.roles)
 	};
 };
 

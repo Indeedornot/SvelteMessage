@@ -26,22 +26,3 @@
 		</div>
 	{/if}
 </div>
-
-<style>
-	.messages {
-		overflow-y: auto;
-		overscroll-behavior: contain;
-		scroll-snap-type: y mandatory;
-	}
-
-	.messages > :global(*) {
-		scroll-snap-align: start;
-		padding-bottom: 12px;
-		padding-left: 10px;
-		padding-right: 8px;
-	}
-
-	.messages > :global(:first-child) {
-		padding-top: 12px;
-	}
-</style>

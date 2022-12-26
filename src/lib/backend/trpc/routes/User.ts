@@ -1,11 +1,11 @@
 import { prisma } from '$lib/backend/prisma/prisma';
-import { socketUtil } from '$lib/backend/socketio/socketUtils';
 import { generateRandomAvatar } from '$lib/helpers/RandomAvatar';
 import { type CurrUserData, CurrUserScheme, type UserData, UserScheme, UserStatus, idScheme } from '$lib/models';
 import { z } from 'zod';
 
+import { getChannelsByUserId, getCurrChannelById, getOwnedByUserId, mapRoles } from '../../prisma/helpers';
 import { logger } from '../middleware/logger';
-import { t, trpcUtils } from '../t';
+import { t } from '../t';
 
 export const user = t.router({
 	getById: t.procedure
@@ -43,43 +43,19 @@ export const user = t.router({
 			const user = await prisma.user.findUniqueOrThrow({
 				where: {
 					id: input
-				},
-				include: {
-					channelUser: {
-						select: {
-							channel: true
-						}
-					},
-					owned: {
-						select: {
-							id: true
-						}
-					},
-					currChannel: {
-						select: {
-							id: true,
-							owner: {
-								select: {
-									id: true
-								}
-							},
-							roles: true
-						}
-					}
 				}
 			});
+
+			const currChannel = await getCurrChannelById(user);
+			const channels = await getChannelsByUserId(user.id);
+			const owned = await getOwnedByUserId(user.id);
 
 			const returnData: CurrUserData = {
 				...user,
 				status: user.status as never,
-				channels: user.channelUser.map((x) => x.channel),
-				currChannel: user.currChannel
-					? {
-							id: user.currChannel.id,
-							owner: user.currChannel.owner.id === user.id
-					  }
-					: null,
-				owned: user.owned.map((x) => x.id)
+				channels: channels,
+				currChannel: currChannel,
+				owned: owned
 			};
 
 			return CurrUserScheme.parse(returnData);

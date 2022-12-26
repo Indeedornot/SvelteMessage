@@ -79,11 +79,15 @@ model Channel {
 }
 
 model Role {
-    id   Int    @id @default(autoincrement())
-    name String
+    id    Int    @id @default(autoincrement())
+    order Int
+    name  String
 
     channel   Channel @relation(fields: [channelId], references: [id])
     channelId Int
 
-    users ChannelUser[]
+    permissions Bytes
+    users       ChannelUser[]
+
+    @@unique([channelId, order])
 }

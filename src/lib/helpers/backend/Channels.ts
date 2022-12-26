@@ -139,7 +139,8 @@ export const fetchChannelByIdWithData = async (channelId: number) => {
 		left: leftUsers,
 		messages: MessagesData,
 		users: channel.users,
-		ownerId: channel.ownerId
+		ownerId: channel.ownerId,
+		roles: channel.roles
 	};
 };
 

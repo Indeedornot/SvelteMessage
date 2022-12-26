@@ -1,13 +1,15 @@
 import { z } from 'zod';
 
 import { ChannelScheme } from '../Channel';
+import { RoleScheme } from '../Role/RoleSchema';
 import { idScheme } from '../Schemas';
 import { BaseUserSchema } from './UserSchema';
 
 const currChanelSchema = z
 	.object({
 		id: idScheme,
-		owner: z.boolean()
+		owner: z.boolean(),
+		roles: z.array(RoleScheme)
 	})
 	.nullable();
 

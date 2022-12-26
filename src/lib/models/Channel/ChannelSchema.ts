@@ -1,11 +1,12 @@
 import { z } from 'zod';
 
 import { MessageApiScheme } from '../Message';
+import { RoleScheme } from '../Role/RoleSchema';
 import { avatarSchema, dateSchema, idScheme } from '../Schemas';
 import { UserScheme } from '../User';
 import { ChannelConstr } from './ChannelData';
 
-export const channelNameSchema = z.string().min(ChannelConstr.name.minLength).max(ChannelConstr.name.maxLength);
+const channelNameSchema = z.string().min(ChannelConstr.name.minLength).max(ChannelConstr.name.maxLength);
 
 export const ChannelScheme = z.object({
 	id: idScheme,
@@ -13,7 +14,8 @@ export const ChannelScheme = z.object({
 	avatar: avatarSchema,
 	createdAt: dateSchema,
 	updatedAt: dateSchema,
-	ownerId: idScheme
+	ownerId: idScheme,
+	roles: z.array(RoleScheme)
 });
 
 export const ChannelApiScheme = ChannelScheme.extend({
