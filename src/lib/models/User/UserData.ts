@@ -12,21 +12,20 @@ export type UserData = BaseUserData & {
 	channels: number[];
 };
 
+type CurrChannel = {
+	id: number;
+	owner: boolean;
+} | null;
+
 export type UserSocketData = BaseUserData & {
 	channels: number[];
-	currChannel: {
-		id: number;
-		owner: boolean;
-	} | null;
+	currChannel: CurrChannel;
 	owned: number[];
 };
 
 export type CurrUserData = BaseUserData & {
 	channels: ChannelData[];
-	currChannel: {
-		id: number;
-		owner: boolean;
-	} | null;
+	currChannel: CurrChannel;
 	owned: number[];
 };
 

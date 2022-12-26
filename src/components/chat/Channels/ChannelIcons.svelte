@@ -3,8 +3,8 @@
 	import { UserStore } from '$lib/stores';
 
 	import Avatar from '../Avatar.svelte';
-	import Channel from './Channel.svelte';
-	import ChooseModal from './ChooseModal.svelte';
+	import ChannelIcon from './ChannelIcon.svelte';
+	import ChooseModal from './Modal/ChooseModal.svelte';
 
 	let modalOpen = false;
 
@@ -17,10 +17,10 @@
 	};
 </script>
 
-<div class="flex h-full w-[72px] flex-none bg-dark">
+<div class=" flex h-full w-[72px] flex-none bg-dark">
 	<div class="flex h-full w-full flex-col items-center overflow-y-auto pt-1">
 		{#each $UserStore?.channels ?? [] as channel}
-			<Channel channel={channel} switchChannel={switchChannel} />
+			<ChannelIcon channel={channel} switchChannel={switchChannel} />
 		{/each}
 		<button
 			class="flex h-[48px] w-[48px] flex-none items-center justify-center rounded-full bg-subtle"

@@ -26,28 +26,10 @@
 	};
 
 	const closeModal = () => {
-		if (modal.join.open) {
-			closeJoinModal();
-		} else if (modal.create.open) {
-			closeCreateModal();
-		}
-
-		open = false;
-	};
-
-	const closeJoinModal = () => {
+		if (modal.join.pending || modal.create.pending) return;
 		modal.join.open = false;
-		modal.join.data = {
-			channelId: ''
-		};
-	};
-
-	const closeCreateModal = () => {
 		modal.create.open = false;
-		modal.create.data = {
-			name: '',
-			avatar: ''
-		};
+		open = false;
 	};
 </script>
 
@@ -122,9 +104,9 @@
 				</span>
 			</div>
 		{:else if modal.join.open}
-			<JoinModal bind:join={modal.join} onClose={closeJoinModal} />
+			<JoinModal bind:join={modal.join} closeModal={closeModal} />
 		{:else if modal.create.open}
-			<CreateModal bind:create={modal.create} onClose={closeCreateModal} />
+			<CreateModal bind:create={modal.create} closeModal={closeModal} />
 		{/if}
 	</div>
 {/if}

@@ -1,4 +1,4 @@
-import type { BaseUserData, UserData } from '../User/';
+import type { BaseUserData } from '../User/';
 
 //#: Channel stuff is handled inside socket itself
 

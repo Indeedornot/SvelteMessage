@@ -9,9 +9,26 @@ const createLeftUsersStore = () => {
 	const { subscribe, set: setInternal, update } = writable<UserData[]>([]);
 
 	const crud = {
-		remove: (userId: number) => update((users) => users.filter((user) => user.id !== userId)),
+		remove: (userId: number) => {
+			let user: UserData | undefined;
+			update((users) => {
+				const userIndex = users.findIndex((user) => user.id === userId);
+				if (userIndex === -1) return users;
+
+				user = users.splice(userIndex, 1)[0];
+				return users;
+			});
+
+			return user;
+		},
 		set: (users: UserData[]) => setInternal(users),
-		clear: () => setInternal([])
+		clear: () => setInternal([]),
+		addObj: (user: UserData) => {
+			update((users) => {
+				if (!users.find((u) => u.id === user.id)) return [...users, user];
+				return users;
+			});
+		}
 	};
 
 	return {
@@ -26,14 +43,23 @@ const createUsersStore = () => {
 	const { subscribe, set: setInternal, update } = writable<UserData[]>([]);
 
 	const crud = {
-		add: (user: UserData) => {
+		addObj: (user: UserData) => {
 			update((users) => {
 				if (!users.find((u) => u.id === user.id)) return [...users, user];
 				return users;
 			});
 		},
 		remove: (userId: number) => {
-			update((users) => users.filter((user) => user.id !== userId));
+			let user: UserData | undefined;
+			update((users) => {
+				const userIndex = users.findIndex((user) => user.id === userId);
+				if (userIndex === -1) return users;
+
+				user = users.splice(userIndex, 1)[0];
+				return users;
+			});
+
+			return user;
 		},
 		update: (userId: number, data: UserChangedData) => {
 			update((users) => {

@@ -1,4 +1,10 @@
-import { fetchChannelByIdWithData, getChannelById, joinNewChannel, switchChannel } from '$lib/helpers/backend/Channels';
+import {
+	fetchChannelByIdWithData,
+	getChannelById,
+	joinNewChannel,
+	leaveChannel,
+	switchChannel
+} from '$lib/helpers/backend/Channels';
 import { getSelfUser, updateUser } from '$lib/helpers/backend/User';
 import { browserUtils, updateRef } from '$lib/helpers/jsUtils';
 import type { ChannelData, ChannelUpdateApiData, CurrUserData, UserChangedData } from '$lib/models';
@@ -69,15 +75,19 @@ const createUserStore = () => {
 					return user;
 				});
 			},
-			remove: (channelId: number) => {
+			remove: async (channelId: number) => {
+				const user = get(UserStore);
+				if (!user) return;
+				await leaveChannel(channelId);
+
 				update((user) => {
 					if (!user) return null;
 
 					user.channels = user.channels.filter((channel) => channel.id !== channelId);
+
 					if (channelId === user.currChannel?.id) {
 						user.currChannel = null;
 						UsersCache.crud.clear();
-						LeftUsersStore.crud.clear();
 						MessageCache.crud.clear();
 					}
 
@@ -86,7 +96,7 @@ const createUserStore = () => {
 			},
 			update: (channelId: number, data: ChannelUpdateApiData) => {
 				update((user) => {
-					if (!user) return user;
+					if (!user) return null;
 
 					const channel = user.channels.find((channel) => channel.id === channelId);
 					if (!channel) return user;

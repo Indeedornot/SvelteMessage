@@ -1,10 +1,11 @@
 import { prisma } from '$lib/backend/prisma/prisma';
+import { socketUtil } from '$lib/backend/socketio/socketUtils';
 import { generateRandomAvatar } from '$lib/helpers/RandomAvatar';
 import { type CurrUserData, CurrUserScheme, type UserData, UserScheme, UserStatus, idScheme } from '$lib/models';
 import { z } from 'zod';
 
 import { logger } from '../middleware/logger';
-import { t } from '../t';
+import { t, trpcUtils } from '../t';
 
 export const user = t.router({
 	getById: t.procedure
@@ -61,7 +62,8 @@ export const user = t.router({
 								select: {
 									id: true
 								}
-							}
+							},
+							roles: true
 						}
 					}
 				}
@@ -69,7 +71,7 @@ export const user = t.router({
 
 			const returnData: CurrUserData = {
 				...user,
-				status: user.status as any,
+				status: user.status as never,
 				channels: user.channelUser.map((x) => x.channel),
 				currChannel: user.currChannel
 					? {
@@ -94,7 +96,7 @@ export const user = t.router({
 
 		const returnData: CurrUserData = {
 			...user,
-			status: user.status as any,
+			status: user.status as never,
 			channels: [],
 			owned: [],
 			currChannel: null
@@ -130,7 +132,7 @@ export const user = t.router({
 			const returnData: UserData[] = users.map((user) => {
 				return {
 					...user,
-					status: user.status as any,
+					status: user.status as never,
 					channels: user.channelUser.map((x) => x.channel.id)
 				};
 			});

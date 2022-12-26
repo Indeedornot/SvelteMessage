@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { Exit } from '$components/icons';
+	import { idScheme } from '$lib/models';
 	import { UserStore } from '$lib/stores';
 
-	export let onClose: () => void;
+	export let closeModal: () => void;
 	export let join = {
 		open: false,
 		pending: false,
@@ -13,22 +14,32 @@
 
 	const joinChannel = async () => {
 		if (join.pending) return;
-		let idNum = parseInt(join.data.channelId);
-		if (isNaN(idNum)) return;
+		const id = parseInt(join.data.channelId);
+		if (isNaN(id)) return;
+
+		const parseData = idScheme.safeParse(id);
+		if (!parseData.success) return;
 
 		join.pending = true;
-		const result = await UserStore.crud.channels.add(idNum);
+		const result = await UserStore.crud.channels.add(parseData.data);
 		if (result) {
 			join.data.channelId = '';
 		}
+
 		join.pending = false;
+		closeModal();
+	};
+
+	const closeSelf = () => {
+		join.data.channelId = '';
+		join.open = false;
 	};
 </script>
 
 <div class="shadow-lg absolute flex w-full max-w-md flex-col rounded-lg bg-overlay px-4 py-6">
 	<div class="mb-2 flex flex-none justify-between">
 		<h2 class="text-2xl font-bold text-default">Join Channel</h2>
-		<button class="text-muted hover:text-default" on:click={onClose} disabled={join.pending}>
+		<button class="text-muted hover:text-default" on:click={closeModal} disabled={join.pending}>
 			<Exit size={24} />
 		</button>
 	</div>
@@ -37,6 +48,7 @@
 		type="text"
 		class="m-0 mb-4 rounded border border-subtle bg-dark p-2.5 text-default"
 		placeholder="Channel ID"
+		disabled={join.pending}
 		bind:value={join.data.channelId}
 	/>
 	<div class="flex items-center justify-between">
@@ -45,7 +57,7 @@
 				px-2 py-2 
 				font-bold text-muted 
 				hover:underline focus:outline-none"
-			on:click={onClose}
+			on:click={closeSelf}
 			disabled={join.pending}
 		>
 			Cancel

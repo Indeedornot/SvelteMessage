@@ -1,11 +1,10 @@
 <script lang="ts">
+	import Avatar from '$components/chat/Avatar.svelte';
 	import { Exit } from '$components/icons';
 	import { generateRandomAvatar } from '$lib/helpers/RandomAvatar';
 	import { createChannel as createChannelApi } from '$lib/helpers/backend/Channels';
-	import { avatarSchema } from '$lib/models';
+	import { ChannelCreateApiScheme, avatarSchema } from '$lib/models';
 	import { UserStore } from '$lib/stores';
-
-	import Avatar from '../Avatar.svelte';
 
 	export let create: {
 		open: boolean;
@@ -17,26 +16,36 @@
 	};
 	let parsedAvatar: string | undefined;
 
-	export let onClose: () => void;
+	export let closeModal: () => void;
 
 	const createChannel = async () => {
 		if (create.pending) return;
 		const currUser = $UserStore;
 		if (!currUser) return;
 
+		const parseData = ChannelCreateApiScheme.safeParse({ ...create.data, creatorId: currUser.id });
+		if (!parseData.success) {
+			console.log(parseData.error);
+			return;
+		}
+
 		create.pending = true;
-		await createChannelApi({
-			...create.data,
-			creatorId: currUser.id
-		});
+		await createChannelApi(parseData.data);
 		create.pending = false;
+		closeModal();
+	};
+
+	const closeSelf = () => {
+		create.data.name = '';
+		create.data.avatar = '';
+		create.open = false;
 	};
 </script>
 
 <div class="shadow-lg absolute flex w-full max-w-md flex-col rounded-lg bg-overlay px-4 py-6">
 	<div class="mb-2 flex flex-none justify-between">
 		<h2 class="text-2xl font-bold text-default">Create Server</h2>
-		<button class="text-muted hover:text-default" on:click={onClose} disabled={create.pending}>
+		<button class="text-muted hover:text-default" on:click={closeModal} disabled={create.pending}>
 			<Exit size={24} />
 		</button>
 	</div>
@@ -95,7 +104,7 @@
 				px-2 py-2 
 				font-bold text-muted 
 				hover:underline focus:outline-none"
-			on:click={onClose}
+			on:click={closeSelf}
 			disabled={create.pending}
 		>
 			Cancel

@@ -8,10 +8,10 @@ import {
 	type MessageData,
 	type UserData
 } from '$lib/models';
-import { UserStore, UsersCache } from '$lib/stores';
+import { LeftUsersStore, MessageCache, UserStore, UsersCache } from '$lib/stores';
 import { get } from 'svelte/store';
 
-import { browserUtils } from '../jsUtils';
+import { browserUtils, updateRef } from '../jsUtils';
 import { getUserById } from './User';
 
 export const addChannelListener = () => {
@@ -20,8 +20,19 @@ export const addChannelListener = () => {
 	});
 
 	io.on('ChannelNewJoined', async (userId: number) => {
+		const oldUser = LeftUsersStore.crud.remove(userId);
 		const user = await getUserById(userId);
-		UsersCache.crud.add(user);
+
+		if (oldUser) {
+			//since oldUser is still attached to messages, we need to update it
+			browserUtils.log('ChannelNewJoined', oldUser, user);
+			updateRef(oldUser, user);
+			UsersCache.crud.addObj(oldUser);
+			MessageCache.crud.causeUpdate();
+			return;
+		}
+
+		UsersCache.crud.addObj(user);
 	});
 
 	io.on('ChannelRemoved', (channelId: number) => {
@@ -29,7 +40,10 @@ export const addChannelListener = () => {
 	});
 
 	io.on('ChannelLeft', (userId: number) => {
-		UsersCache.crud.remove(userId);
+		const user = UsersCache.crud.remove(userId);
+		if (!user) return;
+
+		LeftUsersStore.crud.addObj(user);
 	});
 };
 
@@ -80,7 +94,6 @@ export const leaveChannel = (channelId: number): Promise<void> => {
 
 		io.emit('ChannelLeft', channelId);
 		io.once('ChannelFinishedLeaving', () => {
-			UserStore.crud.channels.remove(channelId);
 			resolve();
 		});
 	});
@@ -91,10 +104,13 @@ export const fetchChannelByIdWithData = async (channelId: number) => {
 	if (!currUser) return null;
 
 	browserUtils.log('fetchChannelByIdWithData', channelId);
-	const channel = await trpc().channel.getByIdWithData.query({ id: channelId, messageCount: 10 });
+	const channel = await trpc().channel.getByIdWithData.query({
+		id: channelId,
+		messageCount: 10,
+		excludeId: currUser.id
+	});
 	if (!channel) return null;
 
-	channel.users = channel.users.filter((user) => user.id !== currUser.id);
 	const leftUsers: UserData[] = []; // users that are not in the channel anymore
 	const MessagesData: MessageData[] = [];
 
@@ -104,19 +120,20 @@ export const fetchChannelByIdWithData = async (channelId: number) => {
 			continue;
 		}
 
+		//is in channel users
 		let sender = channel.users.find((user) => user.id === message.senderId);
 		if (!sender) {
-			sender = await getUserById(message.senderId);
-			leftUsers.push(sender);
+			//is cached in leftUsers
+			sender = leftUsers.find((user) => user.id === message.senderId);
+			if (!sender) {
+				//is not cached in leftUsers -> fetch from server
+				sender = await getUserById(message.senderId);
+				leftUsers.push(sender);
+			}
 		}
 
 		MessagesData.push(ApiToMsgData(message, sender));
 	}
-
-	console.group();
-	console.table(channel.messages);
-	console.table(MessagesData);
-	console.groupEnd();
 
 	return {
 		left: leftUsers,

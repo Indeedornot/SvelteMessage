@@ -179,7 +179,7 @@ const leaveChannel = async (socket: typedSocket, user: UserSocketData, channelId
 	await prisma.channelUser.delete({
 		where: {
 			channelId_userId: {
-				channelId,
+				channelId: channelId,
 				userId: user.id
 			}
 		}

@@ -1,6 +1,7 @@
 <script lang="ts">
-	import ContextMenu from '$components/chat/Channels/ContextMenu.svelte';
+	import ContextMenu from '$components/chat/Channels/Menu/ContextMenu.svelte';
 	import type { ChannelData } from '$lib/models';
+	import { portal } from 'svelte-portal';
 
 	import Avatar from '../Avatar.svelte';
 
@@ -11,10 +12,6 @@
 		position: { x: 0, y: 0 },
 		show: false
 	};
-
-	const closeContextMenu = () => {
-		contextMenu.show = false;
-	};
 </script>
 
 <div class="mb-2 h-[48px] w-[48px]">
@@ -24,13 +21,16 @@
 		on:contextmenu={(e) => {
 			e.preventDefault();
 			contextMenu.show = true;
-			contextMenu.position = { x: e.clientX, y: e.clientY };
+			contextMenu.position = {
+				x: e.clientX,
+				y: e.clientY
+			};
 		}}
 	>
 		<Avatar height={48} width={48} src={channel.avatar} />
 	</button>
 
 	{#if contextMenu.show}
-		<ContextMenu position={contextMenu.position} onClose={closeContextMenu} />
+		<ContextMenu channel={channel} position={contextMenu.position} bind:show={contextMenu.show} />
 	{/if}
 </div>

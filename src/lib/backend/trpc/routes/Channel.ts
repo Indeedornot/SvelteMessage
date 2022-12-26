@@ -18,7 +18,8 @@ export const channel = t.router({
 		.input(
 			z.object({
 				id: idScheme,
-				messageCount: z.number().min(0).max(100)
+				messageCount: z.number().min(0).max(100),
+				excludeId: idScheme.optional()
 			})
 		)
 		.query(async ({ input }) => {
@@ -39,6 +40,7 @@ export const channel = t.router({
 						}
 					},
 					users: {
+						where: input.excludeId ? { NOT: { userId: input.excludeId } } : undefined,
 						select: {
 							user: {
 								include: {
@@ -88,9 +90,13 @@ export const channel = t.router({
 		.use(logger)
 		.input(idScheme)
 		.query(async ({ input }) => {
-			const channel = await prisma.channel.findUniqueOrThrow({
+			const channel = await prisma.channel.findUnique({
 				where: { id: input }
 			});
+
+			if (!channel) {
+				return null;
+			}
 
 			const returnData: ChannelData = {
 				avatar: channel.avatar,

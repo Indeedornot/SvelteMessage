@@ -1,4 +1,4 @@
-import type { MessageApiData, MessageData } from '../Message';
+import type { MessageApiData } from '../Message';
 import type { UserData } from '../User';
 
 export type ChannelData = {
