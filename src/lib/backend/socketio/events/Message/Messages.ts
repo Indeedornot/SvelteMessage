@@ -101,7 +101,8 @@ export const addMessageListener = (io: typedServer, socket: typedSocket) => {
 
 		const updateData = {
 			...data,
-			updatedAt: updatedAt
+			updatedAt: updatedAt,
+			id: messageId
 		};
 
 		socket.broadcast.to(roomFromChannel(user.currChannel.id)).emit('MessageChanged', messageId, updateData);

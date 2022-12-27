@@ -1,41 +1,25 @@
-import type { BaseUserData } from '../User/';
+import type { z } from 'zod';
+
+import type { BaseUserData, UserData } from '../User/';
+import type {
+	MessageApiScheme,
+	MessageChangedScheme,
+	MessageCreateApiScheme,
+	MessageScheme,
+	MessageUpdateApiScheme
+} from './MessageSchema';
 
 //#: Channel stuff is handled inside socket itself
 
-export type MessageData = {
-	// receiver: string;
-	// isRead: boolean;
-	// isDeleted: boolean;
-	// isEdited: boolean;
-	// isPinned: boolean;
+export type MessageData = z.infer<typeof MessageScheme>;
 
-	id: number;
-	text: string;
-	sender: BaseUserData;
-	createdAt: Date;
-	updatedAt: Date;
-};
+export type MessageApiData = z.infer<typeof MessageApiScheme>;
 
-export type MessageApiData = {
-	id: number;
-	text: string;
-	senderId: number;
-	createdAt: Date;
-	updatedAt: Date;
-};
+export type MessageCreateApiData = z.infer<typeof MessageCreateApiScheme>;
 
-export type MessageCreateApiData = {
-	text: string;
-};
+export type MessageChangedData = z.infer<typeof MessageChangedScheme>;
 
-export type MessageChangedData = {
-	text: string;
-};
-
-export type MessageUpdateApiData = {
-	text: string;
-	updatedAt: Date;
-};
+export type MessageUpdateApiData = z.infer<typeof MessageUpdateApiScheme>;
 
 export const MessageConstr = {
 	text: { maxLength: 256, minLength: 1 }

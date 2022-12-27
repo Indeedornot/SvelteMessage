@@ -1,21 +1,10 @@
-export type RoleData = {
-	id: number;
-	order: number;
-	name: string;
-	permissions: number[];
-};
+import type { z } from 'zod';
 
-export type RoleCreateApiData = {
-	name: string;
-	order?: number; //default is end
-	permissions: number[];
-};
+import type { RoleChangedScheme, RoleCreateApiScheme, RoleScheme } from './RoleSchema';
 
-export type RoleChangedData = {
-	name?: string;
-	order?: number;
-	permissions?: number[];
-};
+export type RoleData = z.infer<typeof RoleScheme>;
+export type RoleCreateApiData = z.infer<typeof RoleCreateApiScheme>;
+export type RoleChangedData = z.infer<typeof RoleChangedScheme>;
 
 export const RoleConstr = {
 	name: { maxLength: 50, minLength: 1 }

@@ -5,7 +5,7 @@ import { RoleScheme } from '../Role/RoleSchema';
 import { idScheme } from '../Schemas';
 import { BaseUserSchema } from './UserSchema';
 
-const currChanelSchema = z
+export const CurrChannelSchema = z
 	.object({
 		id: idScheme,
 		owner: z.boolean(),
@@ -15,12 +15,12 @@ const currChanelSchema = z
 
 export const CurrUserScheme = BaseUserSchema.extend({
 	channels: z.array(ChannelScheme),
-	currChannel: currChanelSchema,
+	currChannel: CurrChannelSchema,
 	owned: z.array(idScheme)
 });
 
 export const UserSocketScheme = BaseUserSchema.extend({
 	channels: z.array(idScheme),
-	currChannel: currChanelSchema,
+	currChannel: CurrChannelSchema,
 	owned: z.array(idScheme)
 });

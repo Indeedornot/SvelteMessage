@@ -1,42 +1,20 @@
-import type { ChannelData } from '../Channel';
-import type { RoleData } from '../Role/RoleData';
+import type { z } from 'zod';
 
-export type BaseUserData = {
-	id: number;
-	name: string;
-	avatar: string;
-	status: UserStatus;
-	online: boolean;
-};
+import type { CurrChannelSchema, CurrUserScheme, UserSocketScheme } from './CurrUserSchema';
+import type { BaseUserSchema, UserChangedScheme, UserScheme } from './UserSchema';
 
-export type UserData = BaseUserData & {
-	channels: number[];
-};
+export type BaseUserData = z.infer<typeof BaseUserSchema>;
 
-export type CurrChannelData = {
-	id: number;
-	owner: boolean;
-	roles: RoleData[];
-} | null;
+export type UserData = z.infer<typeof UserScheme>;
 
-export type UserSocketData = BaseUserData & {
-	channels: number[];
-	currChannel: CurrChannelData;
-	owned: number[];
-};
+export type CurrChannelData = z.infer<typeof CurrChannelSchema>;
 
-export type CurrUserData = BaseUserData & {
-	channels: ChannelData[];
-	currChannel: CurrChannelData;
-	owned: number[];
-};
+export type UserSocketData = z.infer<typeof UserSocketScheme>;
+
+export type CurrUserData = z.infer<typeof CurrUserScheme>;
 
 //without id and online since they are not updatable by the user
-export type UserChangedData = {
-	name?: string;
-	avatar?: string;
-	status?: UserStatus;
-};
+export type UserChangedData = z.infer<typeof UserChangedScheme>;
 
 export enum UserStatus {
 	Online = 'online',
