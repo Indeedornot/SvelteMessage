@@ -1,44 +1,30 @@
 import { prisma } from '$lib/backend/prisma/prisma';
 import { generateRandomAvatar } from '$lib/helpers/RandomAvatar';
-import { type CurrUserData, CurrUserScheme, type UserData, UserScheme, UserStatus, idScheme } from '$lib/models';
+import { type CurrUserApiData, CurrUserApiSchema, type UserData, UserSchema, UserStatus, idSchema } from '$lib/models';
 import { z } from 'zod';
 
-import { getChannelsByUserId, getCurrChannelById, getOwnedByUserId, mapRoles } from '../../prisma/helpers';
+import { getChannelUsersByUserId, getChannelsByUserId, getUserById, getUsersByChannelId } from '../../prisma/helpers';
 import { logger } from '../middleware/logger';
 import { t } from '../t';
 
 export const user = t.router({
 	getById: t.procedure
 		.use(logger)
-		.input(idScheme)
+		.input(
+			z.object({
+				id: z.number(),
+				channelId: z.number()
+			})
+		)
 		.query(async ({ input }) => {
-			const user = await prisma.user.findUniqueOrThrow({
-				where: {
-					id: input
-				},
-				include: {
-					channelUser: {
-						select: {
-							channel: {
-								select: {
-									id: true
-								}
-							}
-						}
-					}
-				}
-			});
+			const user = await getUserById(input);
+			const returnData: UserData = { ...user };
 
-			const returnData = {
-				...user,
-				channels: user.channelUser.map((x) => x.channel.id)
-			};
-
-			return UserScheme.parse(returnData);
+			return UserSchema.parse(returnData);
 		}),
 	getByIdWithData: t.procedure
 		.use(logger)
-		.input(idScheme)
+		.input(idSchema)
 		.query(async ({ input }) => {
 			const user = await prisma.user.findUniqueOrThrow({
 				where: {
@@ -46,19 +32,17 @@ export const user = t.router({
 				}
 			});
 
-			const currChannel = await getCurrChannelById(user);
 			const channels = await getChannelsByUserId(user.id);
-			const owned = await getOwnedByUserId(user.id);
+			const channelUsers = await getChannelUsersByUserId(user.id);
 
-			const returnData: CurrUserData = {
+			const returnData: CurrUserApiData = {
 				...user,
 				status: user.status as never,
 				channels: channels,
-				currChannel: currChannel,
-				owned: owned
+				channelUsers: channelUsers
 			};
 
-			return CurrUserScheme.parse(returnData);
+			return CurrUserApiSchema.parse(returnData);
 		}),
 	create: t.procedure.use(logger).query(async () => {
 		const user = await prisma.user.create({
@@ -70,49 +54,20 @@ export const user = t.router({
 			}
 		});
 
-		const returnData: CurrUserData = {
+		const returnData: CurrUserApiData = {
 			...user,
 			status: user.status as never,
 			channels: [],
-			owned: [],
-			currChannel: null
+			channelUsers: []
 		};
 
-		return CurrUserScheme.parse(returnData);
+		return CurrUserApiSchema.parse(returnData);
 	}),
 	getAllByChannelId: t.procedure
 		.use(logger)
-		.input(idScheme)
+		.input(idSchema)
 		.query(async ({ input }) => {
-			const users = await prisma.user.findMany({
-				where: {
-					channelUser: {
-						some: {
-							channelId: input
-						}
-					}
-				},
-				include: {
-					channelUser: {
-						select: {
-							channel: {
-								select: {
-									id: true
-								}
-							}
-						}
-					}
-				}
-			});
-
-			const returnData: UserData[] = users.map((user) => {
-				return {
-					...user,
-					status: user.status as never,
-					channels: user.channelUser.map((x) => x.channel.id)
-				};
-			});
-
-			return z.array(UserScheme).parse(returnData);
+			const returnData: UserData[] = await getUsersByChannelId(input);
+			return z.array(CurrUserApiSchema).parse(returnData);
 		})
 });

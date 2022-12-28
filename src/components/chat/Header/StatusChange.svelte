@@ -1,11 +1,15 @@
 <script lang="ts">
 	import DropdownBase from '$components/helpers/Dropdown/DropdownBase.svelte';
-	import { UserStatus, UserStatusColors, getStatusColor, getStatusName } from '$lib/models';
+	import { updateUser } from '$lib/helpers/backend';
+	import { UserStatus, getStatusColor, getStatusName } from '$lib/models';
 	import { UserStore } from '$lib/stores';
 
-	const updateStatus = (status: UserStatus) => {
-		if (status === $UserStore?.status) return;
-		UserStore.crud.update({ status });
+	let isUpdating = false;
+	const updateStatus = async (status: UserStatus) => {
+		if (isUpdating || status === $UserStore?.status) return;
+		isUpdating = true;
+		await updateUser({ status });
+		isUpdating = false;
 	};
 
 	let showTooltip = false;

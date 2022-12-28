@@ -1,32 +1,34 @@
 import { z } from 'zod';
 
-import { dateSchema, idScheme } from '../Schemas';
-import { BaseUserSchema } from '../User/UserSchema';
+import { dateSchema, idSchema } from '../Schemas';
+import { UserSchema } from '../User';
 import { MessageConstr } from './MessageData';
 
-export const messageTextScheme = z.string().min(MessageConstr.text.minLength).max(MessageConstr.text.maxLength);
+export const MessageTextScheme = z.string().min(MessageConstr.text.minLength).max(MessageConstr.text.maxLength);
+
+export const SenderSchema = UserSchema.partial({ channelUser: true });
 
 export const MessageScheme = z.object({
-	id: idScheme,
-	text: messageTextScheme,
-	sender: BaseUserSchema,
+	id: idSchema,
+	text: MessageTextScheme,
+	sender: SenderSchema, //for left users
 	createdAt: dateSchema,
 	updatedAt: dateSchema
 });
 
 export const MessageApiScheme = MessageScheme.omit({ sender: true }).extend({
-	senderId: idScheme
+	senderId: idSchema
 });
 
-export const MessageCreateApiScheme = z.object({
-	text: messageTextScheme
+export const MessageCreateScheme = z.object({
+	text: MessageTextScheme
 });
 
 export const MessageChangedScheme = z.object({
-	text: messageTextScheme
+	text: MessageTextScheme
 });
 
-export const MessageUpdateApiScheme = MessageChangedScheme.extend({
-	id: idScheme,
+export const MessageUpdateScheme = MessageChangedScheme.extend({
+	id: idSchema,
 	updatedAt: dateSchema
 });

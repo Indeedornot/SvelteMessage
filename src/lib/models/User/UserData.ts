@@ -1,20 +1,30 @@
 import type { z } from 'zod';
 
-import type { CurrChannelSchema, CurrUserScheme, UserSocketScheme } from './CurrUserSchema';
-import type { BaseUserSchema, UserChangedScheme, UserScheme } from './UserSchema';
+import type { CurrDataSchema, CurrUserApiSchema, CurrUserSchema, UserSocketSchema } from './CurrUserSchema';
+import type { ChannelUserSchema, UserChangedSchema, UserSchema } from './UserSchema';
 
-export type BaseUserData = z.infer<typeof BaseUserSchema>;
+export type ChannelUserData = z.infer<typeof ChannelUserSchema>;
 
-export type UserData = z.infer<typeof UserScheme>;
+export type BaseUserData = {
+	id: number;
+	name: string;
+	avatar: string;
+	status: UserStatus;
+	online: boolean;
+};
 
-export type CurrChannelData = z.infer<typeof CurrChannelSchema>;
+export type UserData = z.infer<typeof UserSchema>;
 
-export type UserSocketData = z.infer<typeof UserSocketScheme>;
+export type CurrData = z.infer<typeof CurrDataSchema>;
 
-export type CurrUserData = z.infer<typeof CurrUserScheme>;
+export type UserSocketData = z.infer<typeof UserSocketSchema>;
+
+export type CurrUserData = z.infer<typeof CurrUserSchema>;
+
+export type CurrUserApiData = z.infer<typeof CurrUserApiSchema>;
 
 //without id and online since they are not updatable by the user
-export type UserChangedData = z.infer<typeof UserChangedScheme>;
+export type UserChangedData = z.infer<typeof UserChangedSchema>;
 
 export enum UserStatus {
 	Online = 'online',

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { UserStatus, type BaseUserData } from '$lib/models';
+	import { type BaseUserData, UserStatus } from '$lib/models';
 
 	import Avatar from '../Avatar.svelte';
 

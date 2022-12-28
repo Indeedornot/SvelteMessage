@@ -1,41 +1,42 @@
 import { z } from 'zod';
 
 import { MessageApiScheme } from '../Message';
-import { RoleScheme } from '../Role/RoleSchema';
-import { avatarSchema, dateSchema, idScheme } from '../Schemas';
-import { UserScheme } from '../User';
+import { RoleSchema } from '../Role/RoleSchema';
+import { avatarSchema, dateSchema, idSchema } from '../Schemas';
+import { ChannelUserSchema, UserSchema } from '../User';
 import { ChannelConstr } from './ChannelData';
 
 const channelNameSchema = z.string().min(ChannelConstr.name.minLength).max(ChannelConstr.name.maxLength);
 
-export const ChannelScheme = z.object({
-	id: idScheme,
+export const ChannelSchema = z.object({
+	id: idSchema,
 	name: channelNameSchema,
 	avatar: avatarSchema,
+	roles: z.array(RoleSchema),
+
 	createdAt: dateSchema,
-	updatedAt: dateSchema,
-	ownerId: idScheme,
-	roles: z.array(RoleScheme)
+	updatedAt: dateSchema
 });
 
-export const ChannelApiScheme = ChannelScheme.extend({
-	users: z.array(UserScheme),
+export const ChannelApiSchema = ChannelSchema.extend({
+	users: z.array(UserSchema),
 	messages: z.array(MessageApiScheme)
 });
 
-export const ChannelCreateApiScheme = z.object({
+export const ChannelCreateSchema = z.object({
 	name: channelNameSchema,
 	avatar: avatarSchema,
-	creatorId: idScheme
+	creatorId: idSchema
 });
 
-export const ChannelChangedScheme = z
+export const ChannelChangedSchema = z
 	.object({
+		id: idSchema,
 		name: channelNameSchema,
 		avatar: avatarSchema
 	})
 	.partial();
 
-export const ChannelUpdateApiScheme = ChannelChangedScheme.extend({
+export const ChannelUpdateSchema = ChannelChangedSchema.extend({
 	updatedAt: dateSchema
 });

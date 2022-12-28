@@ -3,7 +3,7 @@
 	import { Exit } from '$components/icons';
 	import { generateRandomAvatar } from '$lib/helpers/RandomAvatar';
 	import { createChannel as createChannelApi } from '$lib/helpers/backend/Channels';
-	import { ChannelCreateApiScheme, avatarSchema } from '$lib/models';
+	import { ChannelCreateSchema, avatarSchema } from '$lib/models';
 	import { UserStore } from '$lib/stores';
 
 	export let create: {
@@ -23,7 +23,7 @@
 		const currUser = $UserStore;
 		if (!currUser) return;
 
-		const parseData = ChannelCreateApiScheme.safeParse({ ...create.data, creatorId: currUser.id });
+		const parseData = ChannelCreateSchema.safeParse({ ...create.data, creatorId: currUser.id });
 		if (!parseData.success) {
 			console.log(parseData.error);
 			return;

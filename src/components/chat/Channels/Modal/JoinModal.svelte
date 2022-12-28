@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Exit } from '$components/icons';
-	import { idScheme } from '$lib/models';
+	import { joinNewChannel } from '$lib/helpers/backend';
+	import { idSchema } from '$lib/models';
 	import { UserStore } from '$lib/stores';
 
 	export let closeModal: () => void;
@@ -17,11 +18,11 @@
 		const id = parseInt(join.data.channelId);
 		if (isNaN(id)) return;
 
-		const parseData = idScheme.safeParse(id);
+		const parseData = idSchema.safeParse(id);
 		if (!parseData.success) return;
 
 		join.pending = true;
-		const result = await UserStore.crud.channels.add(parseData.data);
+		const result = await joinNewChannel(parseData.data);
 		if (result) {
 			join.data.channelId = '';
 		}

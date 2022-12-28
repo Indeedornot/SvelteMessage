@@ -3,8 +3,8 @@ import {
 	ApiToMsgData,
 	type MessageApiData,
 	type MessageChangedData,
-	type MessageCreateApiData,
-	type MessageUpdateApiData,
+	type MessageCreateData,
+	type MessageUpdateData,
 	type UserData
 } from '$lib/models';
 import { MessageCache, UserStore, UsersCache } from '$lib/stores';
@@ -19,7 +19,7 @@ export const addMessageListener = () => {
 		const currUser = get(UserStore);
 		if (message.senderId === currUser?.id) {
 			MessageCache.crud.add(ApiToMsgData(message, currUser));
-			return ApiToMsgData(message, currUser);
+			return;
 		}
 
 		const usersCache: UserData[] = get(UsersCache);
@@ -27,7 +27,6 @@ export const addMessageListener = () => {
 		if (!user) return;
 
 		MessageCache.crud.add(ApiToMsgData(message, user));
-		return ApiToMsgData(message, user);
 	});
 
 	io.on('MessageDeleted', (messageId: number) => {
@@ -39,19 +38,26 @@ export const addMessageListener = () => {
 	});
 };
 
-export const sendNewMessage = (message: MessageCreateApiData) => {
+export const sendNewMessage = (message: MessageCreateData) => {
 	io.emit('Message', message);
+	// MessageCache.crud.add(message);
 };
 
-export const changeMessage = (messageId: number, message: MessageChangedData): Promise<MessageUpdateApiData> => {
-	return new Promise((resolve) => {
-		io.emit('MessageChanged', messageId, message);
-		io.once('MessageFinishedChanging', (message: MessageUpdateApiData) => {
+export const changeMessage = async (messageId: number, messageChange: MessageChangedData) => {
+	const storedMessage = get(MessageCache).find((message) => message.id === messageId);
+	if (!storedMessage) return;
+
+	const messageUpdate = await new Promise<MessageUpdateData>((resolve) => {
+		io.emit('MessageChanged', messageId, messageChange);
+		io.once('MessageFinishedChanging', (message: MessageUpdateData) => {
 			resolve(message);
 		});
 	});
+
+	MessageCache.crud.update(messageId, messageUpdate);
 };
 
 export const deleteMessage = (messageId: number) => {
 	io.emit('MessageDeleted', messageId);
+	MessageCache.crud.remove(messageId);
 };

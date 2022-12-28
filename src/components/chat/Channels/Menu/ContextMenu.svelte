@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { leaveChannel } from '$lib/helpers/backend';
 	import { clickOutside } from '$lib/helpers/clickOutside';
 	import type { ChannelData } from '$lib/models';
-	import { UserStore } from '$lib/stores';
 	import { portal } from 'svelte-portal';
 
 	import ContextOption from './ContextOption.svelte';
@@ -21,8 +21,8 @@
 		show = false;
 	};
 
-	const leaveChannel = async () => {
-		await UserStore.crud.channels.remove(channel.id);
+	const leave = async () => {
+		await leaveChannel(channel.id);
 		closeSelf();
 	};
 </script>
@@ -38,7 +38,8 @@
 	use:portal
 >
 	<div class="flex flex-col items-center justify-center rounded-md bg-dark text-muted">
-		<ContextOption text="Leave" handleClick={leaveChannel} />
-		<ContextOption text="Delete" handleClick={() => {}} isDisabled={!$UserStore?.owned.includes(channel.id)} />
+		<ContextOption text="Leave" handleClick={leave} />
+		<ContextOption text="Delete" handleClick={() => {}} />
+		<!-- isDisabled={!$UserStore?.owned.includes(channel.id)} -->
 	</div>
 </div>

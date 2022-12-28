@@ -1,7 +1,8 @@
 import { io } from '$lib/backend/socketio/socket-client';
 import { trpc } from '$lib/backend/trpc/client';
-import type { CurrUserData, UserChangedData, UserData, UserSocketData } from '$lib/models';
-import { UsersCache } from '$lib/stores';
+import type { CurrUserApiData, CurrUserData, UserChangedData, UserData, UserSocketData } from '$lib/models';
+import { UserStore, UsersCache } from '$lib/stores';
+import { get } from 'svelte/store';
 
 import { getUserData, setUserData } from '../DataStore';
 import { browserUtils } from '../jsUtils';
@@ -20,7 +21,18 @@ export const goOnline = (user: CurrUserData): Promise<void> => {
 const currUserToSocket = (user: CurrUserData): UserSocketData => {
 	return {
 		...user,
-		channels: user.channels.map((channel) => channel.id)
+		channels: user.channels.map((channel) => {
+			return {
+				id: channel.id,
+				roles: channel.roles.map((role) => {
+					return {
+						id: role.id,
+						permissions: role.permissions,
+						order: role.order
+					};
+				})
+			};
+		})
 	};
 };
 
@@ -42,8 +54,8 @@ export const getSelfUser = async (): Promise<CurrUserData> => {
 	const userId = getUserData();
 
 	if (userId) {
-		const currUserData: CurrUserData = await trpc().user.getByIdWithData.query(userId);
-		return currUserData;
+		const userApiData: CurrUserApiData = await trpc().user.getByIdWithData.query(userId);
+		return apiToCurrUser(userApiData);
 	}
 
 	const newUserData = await trpc()
@@ -53,19 +65,49 @@ export const getSelfUser = async (): Promise<CurrUserData> => {
 			return data;
 		});
 
-	return newUserData;
+	return apiToCurrUser(newUserData);
 };
 
-export const updateUser = (data: UserChangedData): Promise<UserChangedData> => {
-	return new Promise((resolve) => {
-		io.emit('UserChanged', data);
+export const apiToCurrUser = (userApiData: CurrUserApiData): CurrUserData => {
+	const currChannel = userApiData.channels.find((channel) => channel.id === userApiData.currChannelId);
+	const currChannelUser = userApiData.channelUsers.find((cUser) => cUser.channelId === userApiData.currChannelId);
+
+	const currUserData: CurrUserData = {
+		...userApiData,
+		currData: null
+	};
+
+	if (currChannel && currChannelUser) {
+		currUserData.currData = {
+			channel: currChannel,
+			channelUser: currChannelUser
+		};
+	}
+
+	return currUserData;
+};
+
+export const updateUser = async (changeData: UserChangedData) => {
+	const user = get(UserStore);
+	if (!user) return;
+	const updateData = await new Promise<UserChangedData>((resolve) => {
+		io.emit('UserChanged', changeData);
 		io.once('UserFinishedChanging', (data) => {
 			resolve(data);
 		});
 	});
+
+	UserStore.crud.update(updateData);
 };
 
-export const getUserById = async (userId: number): Promise<UserData> => {
+export const getUserById = async (userId: number, channelId: number): Promise<UserData> => {
 	browserUtils.log('getUserById', userId);
-	return await trpc().user.getById.query(userId);
+	return await trpc().user.getById.query({
+		channelId: channelId,
+		id: userId
+	});
+};
+
+export const getChannelUserById = async (channelUserId: number) => {
+	return await trpc().channelUser.getById.query(channelUserId);
 };

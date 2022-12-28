@@ -1,9 +1,9 @@
 import type { z } from 'zod';
 
-import type { RoleChangedScheme, RoleCreateApiScheme, RoleScheme } from './RoleSchema';
+import type { RoleChangedScheme, RoleCreateScheme, RoleSchema } from './RoleSchema';
 
-export type RoleData = z.infer<typeof RoleScheme>;
-export type RoleCreateApiData = z.infer<typeof RoleCreateApiScheme>;
+export type RoleData = z.infer<typeof RoleSchema>;
+export type RoleCreateApiData = z.infer<typeof RoleCreateScheme>;
 export type RoleChangedData = z.infer<typeof RoleChangedScheme>;
 
 export const RoleConstr = {

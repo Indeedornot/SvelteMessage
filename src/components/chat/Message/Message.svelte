@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { changeMessage, deleteMessage } from '$lib/helpers/backend';
 	import type { MessageData } from '$lib/models';
 	import { MessageCache } from '$lib/stores';
 
@@ -20,14 +21,13 @@
 
 		if (isUpdating) return;
 		isUpdating = true;
-		await MessageCache.crud.change(data.id, { text: text });
+		await changeMessage(data.id, { text: text });
 		console.log('updated');
-
 		isUpdating = false;
 	};
 
-	const onRemove = () => {
-		MessageCache.crud.remove(data.id);
+	const onRemove = async () => {
+		deleteMessage(data.id);
 	};
 </script>
 

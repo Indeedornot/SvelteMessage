@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { sendNewMessage } from '$lib/helpers/backend';
-	import type { MessageCreateApiData } from '$lib/models/Message/MessageData';
+	import type { MessageCreateData } from '$lib/models';
 	import { MessageCache, UserStore } from '$lib/stores';
 	import { writable } from 'svelte/store';
 
@@ -12,8 +12,8 @@
 	export let showUsers: boolean;
 
 	const sendMessage = (text: string) => {
-		if (!canSend || !$UserStore) return;
-		const data: MessageCreateApiData = { text: text };
+		if (!canSend || !$UserStore?.currData) return;
+		const data: MessageCreateData = { text: text };
 		sendNewMessage(data);
 	};
 

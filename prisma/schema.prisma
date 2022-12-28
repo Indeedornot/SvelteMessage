@@ -14,7 +14,6 @@ model User {
     status String
     online Boolean @default(false)
 
-    owned       Channel[]     @relation("UserOwner")
     created     Channel[]     @relation("UserCreator")
     channelUser ChannelUser[]
 
@@ -66,9 +65,6 @@ model Channel {
     users    ChannelUser[]
     roles    Role[]
 
-    owner   User @relation(fields: [ownerId], references: [id], name: "UserOwner")
-    ownerId Int
-
     creator   User @relation(fields: [creatorId], references: [id], name: "UserCreator")
     creatorId Int
 
@@ -79,9 +75,10 @@ model Channel {
 }
 
 model Role {
-    id    Int    @id @default(autoincrement())
-    order Int
-    name  String
+    id     Int     @id @default(autoincrement())
+    order  Int
+    name   String
+    hidden Boolean @default(false)
 
     channel   Channel @relation(fields: [channelId], references: [id])
     channelId Int

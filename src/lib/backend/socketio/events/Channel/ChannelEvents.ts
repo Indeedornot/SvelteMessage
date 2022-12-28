@@ -4,7 +4,7 @@ export interface ChannelSTCEvents {
 	ChannelFinishedSwitching: (success: boolean) => void; //acknowledges a channel join
 
 	ChannelNewJoined: (userId: number) => void; //sends message about new user joining
-	ChannelNewFinishedJoining: (success: boolean) => void; //acknowledges a channel join
+	ChannelNewFinishedJoining: (channelUserId: number | null) => void; //acknowledges a channel join
 
 	ChannelChanged: (channelId: number, data: ChannelUpdateApiData) => void; //acknowledges a channel join
 	ChannelFinishedChanging: (data: ChannelUpdateApiData) => void; //acknowledges a channel join

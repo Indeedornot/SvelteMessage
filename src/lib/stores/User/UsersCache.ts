@@ -4,6 +4,7 @@ import type { UserChangedData, UserData } from '$lib/models';
 import { derived, get, writable } from 'svelte/store';
 
 import { MessageCache } from '../MessageCache';
+import { UserStore } from './UserCache';
 
 const createLeftUsersStore = () => {
 	const { subscribe, set: setInternal, update } = writable<UserData[]>([]);
@@ -118,9 +119,12 @@ const createUsersStore = () => {
 
 	const fetch = {
 		user: async (userId: number) => {
+			const currChannel = get(UserStore)?.currData?.channel.id;
+			if (!currChannel) return;
+
 			const user = get(UsersCache).find((user) => user.id === userId);
 			if (!user) {
-				await getUserById(userId).then((fetchedUser) => {
+				await getUserById(userId, currChannel).then((fetchedUser) => {
 					if (fetchedUser)
 						update((users) => {
 							return [...users, fetchedUser];

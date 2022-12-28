@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { Plus } from '$components/icons';
+	import { switchChannel as switchChannelApi } from '$lib/helpers/backend/Channels';
 	import { UserStore } from '$lib/stores';
 
-	import Avatar from '../Avatar.svelte';
 	import ChannelIcon from './ChannelIcon.svelte';
 	import ChooseModal from './Modal/ChooseModal.svelte';
 
@@ -10,9 +10,9 @@
 
 	let switching = false;
 	const switchChannel = async (id: number) => {
-		if (switching || $UserStore?.currChannel?.id === id) return;
+		if (switching || $UserStore?.currData?.channel.id === id) return;
 		switching = true;
-		await UserStore.crud.currChannel.update(id);
+		await switchChannelApi(id);
 		switching = false;
 	};
 </script>

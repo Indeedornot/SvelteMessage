@@ -1,22 +1,26 @@
 import { z } from 'zod';
 
-import { avatarSchema, idScheme } from '../Schemas';
+import { RoleSchema } from '../Role/RoleSchema';
+import { avatarSchema, idSchema } from '../Schemas';
 import { UserConstr, UserStatus } from '../User/UserData';
 
 export const statusSchema = z.nativeEnum(UserStatus);
 
-export const userNameSchema = z.string().min(UserConstr.name.minLength).max(UserConstr.name.maxLength);
+export const UserNameSchema = z.string().min(UserConstr.name.minLength).max(UserConstr.name.maxLength);
 
-export const BaseUserSchema = z.object({
-	id: idScheme,
-	name: userNameSchema,
+export const ChannelUserSchema = z.object({
+	id: idSchema,
+	channelId: idSchema,
+	roles: z.array(RoleSchema)
+});
+
+export const UserSchema = z.object({
+	id: idSchema,
+	name: UserNameSchema,
 	avatar: avatarSchema,
 	status: statusSchema,
-	online: z.boolean()
+	online: z.boolean(),
+	channelUser: ChannelUserSchema.nullable()
 });
 
-export const UserScheme = BaseUserSchema.extend({
-	channels: z.array(idScheme)
-});
-
-export const UserChangedScheme = BaseUserSchema.omit({ online: true, id: true }).partial();
+export const UserChangedSchema = UserSchema.omit({ online: true, id: true, roles: true, channelUser: true }).partial();

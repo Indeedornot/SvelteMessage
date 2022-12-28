@@ -1,5 +1,6 @@
 <script lang="ts">
 	import DropdownBase from '$components/helpers/Dropdown/DropdownBase.svelte';
+	import { updateUser } from '$lib/helpers/backend';
 	import { getDifferentInObject, isEmptyObject } from '$lib/helpers/jsUtils';
 	import type { UserChangedData } from '$lib/models';
 	import { UserStore } from '$lib/stores';
@@ -27,19 +28,15 @@
 
 	let isUpdating = false;
 	const updateDisplay = async () => {
-		if (isUpdating) return;
-		if (!$UserStore) return;
-		isUpdating = true;
-
+		if (isUpdating || !$UserStore) return;
 		const sendData: UserChangedData = getDifferentInObject($UserStore, updateData);
 		if (isEmptyObject(sendData)) {
-			isUpdating = false;
 			return;
 		}
 
-		UserStore.crud.update(sendData).then(() => {
-			isUpdating = false;
-		});
+		isUpdating = true;
+		await updateUser(sendData);
+		isUpdating = false;
 	};
 </script>
 

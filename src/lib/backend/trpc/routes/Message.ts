@@ -1,5 +1,5 @@
 import { prisma } from '$lib/backend/prisma/prisma';
-import { MessageApiScheme, idScheme } from '$lib/models';
+import { MessageApiScheme, idSchema } from '$lib/models';
 import { z } from 'zod';
 
 import { logger } from '../middleware/logger';
@@ -8,7 +8,7 @@ import { t } from '../t';
 export const message = t.router({
 	getById: t.procedure
 		.use(logger)
-		.input(idScheme)
+		.input(idSchema)
 		.query(async ({ input }) => {
 			const message = await prisma.message.findUniqueOrThrow({
 				where: {
@@ -35,7 +35,7 @@ export const message = t.router({
 		}),
 	getByChannelId: t.procedure
 		.use(logger)
-		.input(z.object({ channelId: idScheme, take: z.number().int().min(1) }))
+		.input(z.object({ channelId: idSchema, take: z.number().int().min(1) }))
 		.query(async ({ input }) => {
 			const messages = await prisma.message.findMany({
 				where: {

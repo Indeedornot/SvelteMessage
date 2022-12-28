@@ -1,4 +1,4 @@
-import type { UserData, UserSocketData } from '../../models';
+import type { UserSocketData } from '../../models';
 import type {
 	ChannelCTSEvents,
 	ChannelSTCEvents,
@@ -21,5 +21,5 @@ export interface ServerToClientEvents extends UserSTCEvents, MessageSTCEvents, C
 }
 
 export interface ClientToServerEvents extends UserCTSEvents, MessageCTSEvents, ChannelCTSEvents {
-	Connected: (user: UserData) => void; //Notifies of a new connection
+	Connected: (user: UserSocketData) => void; //Notifies of a new connection
 }

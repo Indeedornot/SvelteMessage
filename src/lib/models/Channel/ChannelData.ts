@@ -1,48 +1,22 @@
-import type { MessageApiData } from '../Message';
-import type { RoleData } from '../Role/RoleData';
-import type { UserData } from '../User';
+import type { z } from 'zod';
 
-export type ChannelData = {
-	id: number;
-	name: string;
-	avatar: string;
-	createdAt: Date;
-	updatedAt: Date;
-	ownerId: number;
-	roles: RoleData[];
-};
+import type {
+	ChannelApiSchema,
+	ChannelChangedSchema,
+	ChannelCreateSchema,
+	ChannelSchema,
+	ChannelUpdateSchema
+} from './ChannelSchema';
 
-export type ChannelCreateApiData = {
-	avatar: string;
-	name: string;
-	creatorId: number;
-};
+export type ChannelData = z.infer<typeof ChannelSchema>;
 
-export type ChannelChangedData = {
-	avatar?: string;
-	name?: string;
-};
+export type ChannelCreateData = z.infer<typeof ChannelCreateSchema>;
 
-export type ChannelUpdateApiData = {
-	name?: string;
-	avatar?: string;
-	updatedAt: Date;
-};
+export type ChannelChangedData = z.infer<typeof ChannelChangedSchema>;
 
-export type ChannelApiData = {
-	id: number;
-	name: string;
-	avatar: string;
+export type ChannelUpdateApiData = z.infer<typeof ChannelUpdateSchema>;
 
-	users: UserData[];
-	messages: MessageApiData[];
-	roles: RoleData[];
-
-	ownerId: number;
-
-	createdAt: Date;
-	updatedAt: Date;
-};
+export type ChannelApiData = z.infer<typeof ChannelApiSchema>;
 
 export const ChannelConstr = {
 	name: { maxLength: 50, minLength: 1 }

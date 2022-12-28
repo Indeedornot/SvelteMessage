@@ -1,11 +1,11 @@
 //Needs to use relative imports due to being processed in vite.config.js
 import { Server, Socket } from 'socket.io';
 
-import { UserSocketScheme, UserStatus } from '../../models';
+import { UserSocketSchema, UserStatus } from '../../models';
 import { prisma } from '../prisma/prisma';
 import { addChannelListener, addMessageListener, addUserListener } from './events';
 import type { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from './socket-events';
-import { roomFromChannel, roomsFromChannels, roomsFromChannelsObj, socketUtil } from './socketUtils';
+import { roomFromChannel, roomFromUser, roomsFromChannels, socketUtil } from './socketUtils';
 
 export type typedServer = Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
 export type typedSocket = Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
@@ -29,7 +29,7 @@ export async function injectSocketIO(server: any) {
 			// Save the user data
 			socketUtil.log('[Connected] Connected', user);
 
-			const parseData = UserSocketScheme.safeParse(user);
+			const parseData = UserSocketSchema.safeParse(user);
 			if (!parseData.success) {
 				socketUtil.error('[Connected] Invalid user data');
 				return;
@@ -44,9 +44,10 @@ export async function injectSocketIO(server: any) {
 
 			await makeOnline(user.id);
 
-			// socket.join(getRoomFromUser(userData.id));
-			// shouldn't be needed due to us calling socket.emit() for sender
-			userData.currChannel && socket.join(roomFromChannel(userData.currChannel.id));
+			socketUtil.log('[Connected] Connected CurrData', userData.currData);
+			userData.currData && socket.join(roomFromChannel(userData.currData.channel.id));
+			socket.join(roomFromUser(userData.id)); //for personal messages
+
 			addUserListener(io, socket);
 			addMessageListener(io, socket);
 			addChannelListener(io, socket);

@@ -19,7 +19,7 @@
 		<div class="flex min-h-0 w-full flex-grow flex-row">
 			<Channels />
 			<div class="flex h-full min-w-0 flex-grow bg-default">
-				{#if $UserStore?.currChannel?.id}
+				{#if $UserStore?.currData}
 					<ChannelContent canSend={canSend} showUsers={showUsers} />
 				{/if}
 			</div>

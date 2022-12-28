@@ -1,9 +1,8 @@
 import type { Role } from '@prisma/client';
 
-import type { ChannelData, CurrChannelData, UserData } from '$lib/models';
-import type { RoleData } from '$lib/models/Role/RoleData';
 import type { Buffer } from 'node:buffer';
 
+import type { ChannelData, ChannelUserData, MessageApiData, RoleData, UserData } from '../../models';
 import { prisma } from './prisma';
 
 const toArrayInteger = (buffer: Buffer): number[] => {
@@ -23,31 +22,25 @@ export const mapRoles = (roles: Role[] | undefined): RoleData[] => {
 	}));
 };
 
-export const getCurrChannelById = async (user: {
-	id: number;
-	currChannelId: number | null;
-}): Promise<CurrChannelData> => {
-	if (!user.currChannelId) return null;
-	const channel = await prisma.channel.findUniqueOrThrow({
-		where: {
-			id: user.currChannelId
-		},
-		select: {
-			roles: true,
-			owner: {
-				select: {
-					id: true
-				}
-			},
-			id: true
+export const getRolesByChannelId = async (channelId: number): Promise<RoleData[]> => {
+	const roles = await prisma.role.findMany({
+		where: { channelId: channelId }
+	});
+
+	return mapRoles(roles);
+};
+
+export const getRolesByChannelUserId = async (channelUserId: number): Promise<RoleData[]> => {
+	const channelUser = await prisma.channelUser.findUnique({
+		where: { id: channelUserId },
+		include: {
+			roles: true
 		}
 	});
 
-	return {
-		...channel,
-		roles: mapRoles(channel.roles),
-		owner: channel.owner.id === user.id
-	};
+	if (!channelUser) return [];
+
+	return mapRoles(channelUser.roles);
 };
 
 export const getChannelsByUserId = async (userId: number): Promise<ChannelData[]> => {
@@ -70,15 +63,109 @@ export const getChannelsByUserId = async (userId: number): Promise<ChannelData[]
 	}));
 };
 
-export const getOwnedByUserId = async (userId: number): Promise<number[]> => {
-	const channels = await prisma.channel.findMany({
-		where: {
-			ownerId: userId
-		},
-		select: {
-			id: true
+export const getMessagesByChannelId = async (channelId: number, count: number): Promise<MessageApiData[]> => {
+	const messages = await prisma.message.findMany({
+		where: { channelId: channelId },
+		take: count,
+		orderBy: { createdAt: 'desc' },
+		include: {
+			sender: {
+				select: { id: true }
+			}
 		}
 	});
 
-	return channels.map((x) => x.id);
+	messages.reverse();
+
+	return messages.map((x) => ({
+		...x,
+		senderId: x.sender.id
+	}));
+};
+
+export const getUsersByChannelId = async (channelId: number, exclude: number[] = []): Promise<UserData[]> => {
+	const users = await prisma.channelUser.findMany({
+		where: {
+			channelId: channelId,
+			userId: { notIn: exclude }
+		},
+		select: {
+			user: {
+				include: {
+					channelUser: {
+						where: { channelId: channelId },
+						take: 1,
+						include: {
+							roles: true
+						}
+					}
+				}
+			}
+		}
+	});
+
+	//@ts-expect-error - UserStatus is not defined in prisma
+	return users.map((x) => {
+		return {
+			...x.user,
+			channelUser: {
+				...x.user.channelUser[0],
+				roles: mapRoles(x.user.channelUser[0].roles)
+			}
+		};
+	});
+};
+
+export const getUserById = async (input: { id: number; channelId: number }): Promise<UserData> => {
+	const user = await prisma.user.findUniqueOrThrow({
+		where: { id: input.id },
+		include: {
+			channelUser: {
+				where: { channelId: input.channelId },
+				take: 1,
+				include: { roles: true }
+			}
+		}
+	});
+
+	const channelUser = user.channelUser[0]
+		? {
+				...user.channelUser[0],
+				roles: mapRoles(user.channelUser[0].roles)
+		  }
+		: null;
+
+	return {
+		...user,
+		status: user.status as never,
+		channelUser: channelUser
+	};
+};
+
+export const getChannelUsersByUserId = async (userId: number): Promise<ChannelUserData[]> => {
+	const channelUsers = await prisma.channelUser.findMany({
+		where: { userId: userId },
+		include: {
+			roles: true
+		}
+	});
+
+	return channelUsers.map((x) => ({
+		...x,
+		roles: mapRoles(x.roles)
+	}));
+};
+
+export const getChannelById = async (channelId: number): Promise<ChannelData> => {
+	const channel = await prisma.channel.findUniqueOrThrow({
+		where: { id: channelId },
+		include: {
+			roles: true
+		}
+	});
+
+	return {
+		...channel,
+		roles: mapRoles(channel.roles)
+	};
 };

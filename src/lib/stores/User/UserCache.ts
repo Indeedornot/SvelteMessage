@@ -1,96 +1,56 @@
-import {
-	fetchChannelByIdWithData,
-	getChannelById,
-	joinNewChannel,
-	leaveChannel,
-	switchChannel
-} from '$lib/helpers/backend/Channels';
-import { getSelfUser, updateUser } from '$lib/helpers/backend/User';
+import { getSelfUser } from '$lib/helpers/backend/User';
 import { browserUtils, updateRef } from '$lib/helpers/jsUtils';
-import type { ChannelData, ChannelUpdateApiData, CurrUserData, UserChangedData } from '$lib/models';
-import { get, writable } from 'svelte/store';
+import type {
+	ChannelData,
+	ChannelUpdateApiData,
+	ChannelUserData,
+	CurrData,
+	CurrUserData,
+	UserChangedData
+} from '$lib/models';
+import { writable } from 'svelte/store';
 
 import { MessageCache } from '../MessageCache';
-import { LeftUsersStore, UsersCache } from './UsersCache';
 
 const createUserStore = () => {
 	const { subscribe, set: setInternal, update } = writable<CurrUserData | null>();
 
 	const crud = {
 		set: async (user: CurrUserData) => {
-			//initial room joining is handled by socketio
-
 			setInternal(user);
 			if (!user) {
 				return;
 			}
-
-			//set last channel
-			if (user.currChannel?.id) {
-				crud.currChannel.set(user.currChannel.id);
-			}
 		},
 		update: async (data: UserChangedData) => {
-			const userData = get(UserStore);
-			if (!userData) return null;
-
-			const updateData = await updateUser(data);
 			update((user) => {
 				if (!user) return null;
 
 				//mutate user using data without deleting the reference
-				updateRef(userData, updateData);
-
+				updateRef(user, data);
 				return user;
 			});
 
 			MessageCache.crud.causeUpdate();
 		},
 		channels: {
-			add: async (channelId: number) => {
-				const channel = get(UserStore)?.channels.find((channel) => channel.id === channelId);
-				if (channel) return false;
-
-				const newChannel = await getChannelById(channelId);
-				browserUtils.log('addChannel', newChannel);
-				if (!newChannel) return false;
-
-				await joinNewChannel(channelId);
-
+			add: async (channelData: ChannelData) => {
 				update((user) => {
 					if (!user) return null;
 
-					user.channels = [...user.channels, newChannel];
+					if (!user.channels.find((channel) => channel.id === channelData.id)) {
+						user.channels = [...user.channels, channelData];
+					}
 					return user;
 				});
 
-				browserUtils.log('addedChannel', newChannel);
+				browserUtils.log('addedChannel', channelData);
 				return true;
 			},
-			addObj: (channel: ChannelData) => {
-				update((user) => {
-					if (!user) return null;
-
-					user.channels = [...user.channels, channel];
-					return user;
-				});
-			},
 			remove: async (channelId: number) => {
-				const user = get(UserStore);
-				if (!user) return;
-				await leaveChannel(channelId);
-
 				update((user) => {
 					if (!user) return null;
-
 					user.channels = user.channels.filter((channel) => channel.id !== channelId);
-
-					if (channelId === user.currChannel?.id) {
-						user.currChannel = null;
-						UsersCache.crud.clear();
-						MessageCache.crud.clear();
-					}
-
 					return user;
 				});
 			},
@@ -106,39 +66,34 @@ const createUserStore = () => {
 				});
 			}
 		},
-		currChannel: {
-			update: async (channelId: number) => {
-				//handles a null check
-				await switchChannel(channelId);
-				const channel = await fetchChannelByIdWithData(channelId);
-				console.log('last channel id updated', channel);
-
-				if (!channel) return;
-
-				LeftUsersStore.crud.set(channel.left);
-				UsersCache.crud.set(channel.users);
-				MessageCache.crud.set(channel.messages);
-
+		currData: {
+			set: async (currData: CurrData) => {
 				update((user) => {
 					if (!user) return null;
 
-					user.currChannel = {
-						id: channelId,
-						owner: channel.ownerId === user.id,
-						roles: channel.roles
-					};
-					console.log('last channel id updated', user.currChannel);
-
+					user.currData = currData;
 					return user;
 				});
-			},
-			set: async (channelId: number) => {
-				const channel = await fetchChannelByIdWithData(channelId);
-				if (!channel) return;
+			}
+		},
+		channelUsers: {
+			add: async (channelUser: ChannelUserData) => {
+				update((user) => {
+					if (!user) return null;
 
-				LeftUsersStore.crud.set(channel.left);
-				UsersCache.crud.set(channel.users);
-				MessageCache.crud.set(channel.messages);
+					user.channelUsers = [...user.channelUsers, channelUser];
+					return user;
+				});
+
+				return true;
+			},
+			remove: (channelId: number) => {
+				update((user) => {
+					if (!user) return null;
+
+					user.channelUsers = user.channelUsers.filter((channelUser) => channelUser.channelId !== channelId);
+					return user;
+				});
 			}
 		}
 	};

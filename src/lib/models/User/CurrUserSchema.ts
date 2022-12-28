@@ -1,26 +1,51 @@
 import { z } from 'zod';
 
-import { ChannelScheme } from '../Channel';
-import { RoleScheme } from '../Role/RoleSchema';
-import { idScheme } from '../Schemas';
-import { BaseUserSchema } from './UserSchema';
+import { ChannelSchema } from '../Channel';
+import { RoleSocketSchema } from '../Role/RoleSchema';
+import { avatarSchema, idSchema } from '../Schemas';
+import { ChannelUserSchema, UserNameSchema, statusSchema } from './UserSchema';
 
-export const CurrChannelSchema = z
+export const CurrDataSchema = z
 	.object({
-		id: idScheme,
-		owner: z.boolean(),
-		roles: z.array(RoleScheme)
+		channel: ChannelSchema, //ref
+		channelUser: ChannelUserSchema //ref
 	})
 	.nullable();
 
-export const CurrUserScheme = BaseUserSchema.extend({
-	channels: z.array(ChannelScheme),
-	currChannel: CurrChannelSchema,
-	owned: z.array(idScheme)
+export const CurrUserSchema = z.object({
+	id: idSchema,
+	name: UserNameSchema,
+	avatar: avatarSchema,
+	status: statusSchema,
+	online: z.boolean(),
+	channels: z.array(ChannelSchema),
+	channelUsers: z.array(ChannelUserSchema),
+	currData: CurrDataSchema
 });
 
-export const UserSocketScheme = BaseUserSchema.extend({
-	channels: z.array(idScheme),
-	currChannel: CurrChannelSchema,
-	owned: z.array(idScheme)
+export const CurrUserApiSchema = CurrUserSchema.omit({ currData: true }).extend({
+	currChannelId: idSchema.nullable()
+});
+
+const ChannelSocketSchema = z.object({
+	id: idSchema,
+	roles: z.array(RoleSocketSchema)
+});
+
+const ChannelUserSocketSchema = z.object({
+	id: idSchema,
+	channelId: idSchema,
+	roles: z.array(RoleSocketSchema)
+});
+
+export const UserSocketSchema = z.object({
+	id: idSchema,
+	channels: z.array(ChannelSocketSchema),
+	currData: z
+		.object({
+			channel: ChannelSocketSchema,
+			channelUser: ChannelUserSocketSchema
+		})
+		.nullable(),
+	channelUsers: z.array(ChannelUserSocketSchema)
 });

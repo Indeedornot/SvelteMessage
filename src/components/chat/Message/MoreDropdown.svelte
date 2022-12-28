@@ -19,7 +19,8 @@
 				<Edit size={20} />
 			</button>
 		{/if}
-		{#if user.id === senderId || user.currChannel?.owner}
+		{#if user.id === senderId}
+			<!--  || user.currChannel?.owner -->
 			<button class="rounded-md p-1 text-icon outline-none hover:bg-subtle hover:text-emphasis" on:click={onRemove}>
 				<Trash size={20} />
 			</button>
