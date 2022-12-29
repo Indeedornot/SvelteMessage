@@ -11,7 +11,8 @@ export const UserNameSchema = z.string().min(UserConstr.name.minLength).max(User
 export const ChannelUserSchema = z.object({
 	id: idSchema,
 	channelId: idSchema,
-	roles: z.array(RoleSchema)
+	roles: z.array(RoleSchema),
+	createdAt: z.date()
 });
 
 export const UserSchema = z.object({
@@ -20,6 +21,7 @@ export const UserSchema = z.object({
 	avatar: avatarSchema,
 	status: statusSchema,
 	online: z.boolean(),
+	createdAt: z.date(),
 	channelUser: ChannelUserSchema.nullable()
 });
 

@@ -11,6 +11,7 @@ export type BaseUserData = {
 	avatar: string;
 	status: UserStatus;
 	online: boolean;
+	createdAt: Date;
 };
 
 export type UserData = z.infer<typeof UserSchema>;

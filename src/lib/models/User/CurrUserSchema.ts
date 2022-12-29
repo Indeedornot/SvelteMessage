@@ -18,6 +18,7 @@ export const CurrUserSchema = z.object({
 	avatar: avatarSchema,
 	status: statusSchema,
 	online: z.boolean(),
+	createdAt: z.date(),
 	channels: z.array(ChannelSchema),
 	channelUsers: z.array(ChannelUserSchema),
 	currData: CurrDataSchema

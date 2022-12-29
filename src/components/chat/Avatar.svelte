@@ -19,6 +19,6 @@
 		<img src={src} width={width} height={height} class:rounded-full={rounded} />
 	{/if}
 	{#if status}
-		<div class="h-[12px] w-[12px] place-self-end rounded-full bg-{getStatusColor(status)}" />
+		<div class="mr-[1px] mb-[1px] h-[30%] w-[30%] place-self-end rounded-full bg-{getStatusColor(status)}" />
 	{/if}
 </div>
