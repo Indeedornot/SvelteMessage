@@ -1,15 +1,27 @@
 import { io } from '$lib/backend/socketio/socket-client';
 import { trpc } from '$lib/backend/trpc/client';
-import type { CurrUserApiData, CurrUserData, UserChangedData, UserData, UserSocketData } from '$lib/models';
-import { UserStore, UsersCache } from '$lib/stores';
+import type { ChannelData, UserApiData, UserChangedData, UserData, UserSocketData } from '$lib/models';
+import { ChannelStore, ChannelsCache, UserStore, UsersCache } from '$lib/stores';
 import { get } from 'svelte/store';
 
 import { getUserData, setUserData } from '../DataStore';
 import { browserUtils } from '../jsUtils';
+import { fetchChannelData } from './Channels';
 
-export const goOnline = (user: CurrUserData): Promise<void> => {
+export const fetchUser = async (makeOnline: boolean) => {
+	return await getSelfUser().then(async (u) => {
+		makeOnline && (await goOnline(u));
+		if (u.currChannelId) {
+			await fetchChannelData(u.currChannelId);
+		}
+
+		return u;
+	});
+};
+
+const goOnline = (user: UserData): Promise<void> => {
 	return new Promise<void>((resolve) => {
-		const socketUser = currUserToSocket(user);
+		const socketUser = currUserToSocket();
 		io.emit('Connected', socketUser);
 		io.once('Connected', () => {
 			user.online = true;
@@ -18,21 +30,18 @@ export const goOnline = (user: CurrUserData): Promise<void> => {
 	});
 };
 
-const currUserToSocket = (user: CurrUserData): UserSocketData => {
+const currUserToSocket = (): UserSocketData => {
+	const user = get(UserStore);
+	const channels = get(ChannelsCache);
+	const channel = get(ChannelStore);
+
+	if (!user) throw new Error('User is null');
+	if (!channels) throw new Error('Channels is null');
+
 	return {
 		...user,
-		channels: user.channels.map((channel) => {
-			return {
-				id: channel.id,
-				roles: channel.roles.map((role) => {
-					return {
-						id: role.id,
-						permissions: role.permissions,
-						order: role.order
-					};
-				})
-			};
-		})
+		channels: channels.map((channel) => channel.id),
+		channel: channel
 	};
 };
 
@@ -50,41 +59,33 @@ export const addUserListener = () => {
 	});
 };
 
-export const getSelfUser = async (): Promise<CurrUserData> => {
+const getSelfUser = async (): Promise<UserApiData> => {
 	const userId = getUserData();
 
-	if (userId) {
-		const userApiData: CurrUserApiData = await trpc().user.getByIdWithData.query(userId);
-		return apiToCurrUser(userApiData);
+	let userData: UserApiData;
+	let channels: ChannelData[] = [];
+	let channel: ChannelData | null = null;
+	if (!userId) {
+		userData = await trpc()
+			.user.create.query()
+			.then((data) => {
+				setUserData(data.id);
+				return data;
+			});
+	} else {
+		userData = await trpc().user.getCurrUserById.query(userId);
+
+		channels = await trpc().channel.getByUserId.query(userId);
+		if (userData.channelUser) {
+			channel = channels.find((channel) => channel.id === userData.currChannelId) || null;
+		}
 	}
 
-	const newUserData = await trpc()
-		.user.create.query()
-		.then((data) => {
-			setUserData(data.id);
-			return data;
-		});
+	UserStore.crud.set(userData);
+	ChannelsCache.crud.set(channels);
+	ChannelStore.crud.set(channel);
 
-	return apiToCurrUser(newUserData);
-};
-
-export const apiToCurrUser = (userApiData: CurrUserApiData): CurrUserData => {
-	const currChannel = userApiData.channels.find((channel) => channel.id === userApiData.currChannelId);
-	const currChannelUser = userApiData.channelUsers.find((cUser) => cUser.channelId === userApiData.currChannelId);
-
-	const currUserData: CurrUserData = {
-		...userApiData,
-		currData: null
-	};
-
-	if (currChannel && currChannelUser) {
-		currUserData.currData = {
-			channel: currChannel,
-			channelUser: currChannelUser
-		};
-	}
-
-	return currUserData;
+	return userData;
 };
 
 export const updateUser = async (changeData: UserChangedData) => {
@@ -110,4 +111,11 @@ export const getUserById = async (userId: number, channelId: number): Promise<Us
 
 export const getChannelUserById = async (channelUserId: number) => {
 	return await trpc().channelUser.getById.query(channelUserId);
+};
+
+export const getChannelUserByData = async (channelId: number, userId: number) => {
+	return await trpc().channelUser.getByData.query({
+		channelId: channelId,
+		userId: userId
+	});
 };

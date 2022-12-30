@@ -4,9 +4,11 @@
 	import { UserStatus, getStatusColor, getStatusName } from '$lib/models';
 	import { UserStore } from '$lib/stores';
 
+	$: user = $UserStore;
+
 	let isUpdating = false;
 	const updateStatus = async (status: UserStatus) => {
-		if (isUpdating || status === $UserStore?.status) return;
+		if (isUpdating || status === user?.status) return;
 		isUpdating = true;
 		await updateUser({ status });
 		isUpdating = false;
@@ -32,10 +34,8 @@
 			on:click={() => (showTooltip = !showTooltip)}
 			slot="button"
 		>
-			<div class="h-[12px] w-[12px] rounded-full bg-{getStatusColor($UserStore?.status)} group-hover:bg-white" />
-			<span class="ml-1 pb-[1px] text-[14px] text-muted group-hover:text-default"
-				>{getStatusName($UserStore?.status)}</span
-			>
+			<div class="h-[12px] w-[12px] rounded-full bg-{getStatusColor(user?.status)} group-hover:bg-white" />
+			<span class="ml-1 pb-[1px] text-[14px] text-muted group-hover:text-default">{getStatusName(user?.status)}</span>
 		</button>
 		<div slot="dropdown" class="rounded-md border-2 border-subtle bg-overlay p-1.5">
 			<div class="flex flex-none flex-col gap-0.5 rounded-md bg-dark">

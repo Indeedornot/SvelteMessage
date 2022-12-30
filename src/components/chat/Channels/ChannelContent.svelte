@@ -12,7 +12,7 @@
 	export let showUsers: boolean;
 
 	const sendMessage = (text: string) => {
-		if (!canSend || !$UserStore?.currData) return;
+		if (!canSend || !$UserStore?.channelUser) return;
 		const data: MessageCreateData = { text: text };
 		sendNewMessage(data);
 	};

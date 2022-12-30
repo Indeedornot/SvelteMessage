@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Plus } from '$components/icons';
 	import { switchChannel as switchChannelApi } from '$lib/helpers/backend/Channels';
-	import { UserStore } from '$lib/stores';
+	import { ChannelStore, ChannelsCache } from '$lib/stores';
 
 	import ChannelIcon from './ChannelIcon.svelte';
 	import ChooseModal from './Modal/ChooseModal.svelte';
@@ -10,7 +10,7 @@
 
 	let switching = false;
 	const switchChannel = async (id: number) => {
-		if (switching || $UserStore?.currData?.channel.id === id) return;
+		if (switching || $ChannelStore?.id === id) return;
 		switching = true;
 		await switchChannelApi(id);
 		switching = false;
@@ -19,7 +19,7 @@
 
 <div class=" flex h-full w-[72px] flex-none bg-dark">
 	<div class="flex h-full w-full flex-col items-center overflow-y-auto pt-1">
-		{#each $UserStore?.channels ?? [] as channel}
+		{#each $ChannelsCache as channel}
 			<ChannelIcon channel={channel} switchChannel={switchChannel} />
 		{/each}
 		<button

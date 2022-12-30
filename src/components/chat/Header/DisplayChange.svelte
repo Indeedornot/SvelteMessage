@@ -10,9 +10,9 @@
 	export let newAvatar: string;
 	export let isUpdating: boolean;
 
-	const generateAvatar = () => {
-		newAvatar = generateRandomAvatar();
-	};
+	$: user = $UserStore;
+
+	const generateAvatar = () => (newAvatar = generateRandomAvatar());
 </script>
 
 <div class="flex w-full">
@@ -21,7 +21,7 @@
 		on:click={generateAvatar}
 		disabled={isUpdating}
 	>
-		<Avatar width={32} height={32} src={newAvatar ?? $UserStore?.avatar} />
+		<Avatar width={32} height={32} src={newAvatar ?? user?.avatar} />
 		<div
 			class="h-[32px] w-[32px] rounded-full group-hover:bg-default/50 group-active:bg-dark/75"
 			class:hidden={isUpdating}
@@ -36,7 +36,7 @@
 				bind:textContent={newName}
 				use:maxLength={{ maxLength: UserConstr.name.maxLength }}
 			>
-				{$UserStore?.name}
+				{user?.name}
 			</span>
 		{:else}
 			<span class="w-full break-all text-[14px] font-semibold leading-[18px] text-default">
@@ -44,6 +44,6 @@
 			</span>
 		{/if}
 
-		<span class="text-[12px] leading-[16px] text-muted">{$UserStore?.id}</span>
+		<span class="text-[12px] leading-[16px] text-muted">{user?.id}</span>
 	</div>
 </div>

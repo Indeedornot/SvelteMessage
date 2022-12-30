@@ -9,7 +9,7 @@ export const addMessageListener = (io: typedServer, socket: typedSocket) => {
 		socketUtil.log('[Message] Message received');
 
 		const user = socket.data.user;
-		if (!user?.currData?.channel.id) {
+		if (!user?.channel?.id) {
 			socketUtil.error('[Message] User not found', user);
 			return;
 		}
@@ -32,19 +32,19 @@ export const addMessageListener = (io: typedServer, socket: typedSocket) => {
 				},
 				channel: {
 					connect: {
-						id: user.currData.channel.id
+						id: user.channel.id
 					}
 				}
 			}
 		});
 
-		socketUtil.log('[Message] Message created', message, roomFromChannel(user.currData.channel.id), socket.rooms);
-		io.to(roomFromChannel(user.currData.channel.id)).emit('Message', message);
+		socketUtil.log('[Message] Message created', message, roomFromChannel(user.channel.id), socket.rooms);
+		io.to(roomFromChannel(user.channel.id)).emit('Message', message);
 	});
 
 	socket.on('MessageDeleted', async (messageId) => {
 		const user = socket.data.user;
-		if (!user?.currData) {
+		if (!user?.channel) {
 			socketUtil.error('[MessageDeleted] User not in channel');
 			return;
 		}
@@ -66,13 +66,13 @@ export const addMessageListener = (io: typedServer, socket: typedSocket) => {
 			}
 		});
 
-		socket.broadcast.to(roomFromChannel(user.currData.channel.id)).emit('MessageDeleted', messageId);
+		socket.broadcast.to(roomFromChannel(user.channel.id)).emit('MessageDeleted', messageId);
 	});
 
 	socket.on('MessageChanged', async (messageId, data) => {
 		socketUtil.log('[MessageChanged] Message changed', messageId, data);
 		const user = socket.data.user;
-		if (!user?.currData) {
+		if (!user?.channel) {
 			socketUtil.error('[MessageChanged] User not in channel');
 			return;
 		}
@@ -108,7 +108,7 @@ export const addMessageListener = (io: typedServer, socket: typedSocket) => {
 			id: messageId
 		};
 
-		socket.broadcast.to(roomFromChannel(user.currData.channel.id)).emit('MessageChanged', messageId, updateData);
+		socket.broadcast.to(roomFromChannel(user.channel.id)).emit('MessageChanged', messageId, updateData);
 		socket.emit('MessageFinishedChanging', updateData);
 	});
 };

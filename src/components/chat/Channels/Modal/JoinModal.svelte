@@ -2,7 +2,6 @@
 	import { Exit } from '$components/icons';
 	import { joinNewChannel } from '$lib/helpers/backend';
 	import { idSchema } from '$lib/models';
-	import { UserStore } from '$lib/stores';
 
 	export let closeModal: () => void;
 	export let join = {

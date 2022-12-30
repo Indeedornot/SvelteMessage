@@ -1,4 +1,4 @@
-import { getChannelById } from '../../../../backend/prisma/helpers';
+import { getChannelById, getChannelUserByData } from '../../../../backend/prisma/helpers';
 import {
 	type ChannelChangedData,
 	type ChannelUpdateApiData,
@@ -11,8 +11,8 @@ import type { typedServer, typedSocket } from '../../socket-handler';
 import { roomFromChannel, roomFromUser, socketUtil } from '../../socketUtils';
 
 export const addChannelListener = (io: typedServer, socket: typedSocket) => {
-	socket.on('ChannelChanged', async (channelId: number, data: ChannelChangedData) => {
-		socketUtil.log('[ChannelChanged] Channel changed', channelId, data);
+	socket.on('ChannelChanged', async (data: ChannelChangedData) => {
+		socketUtil.log('[ChannelChanged] Channel changed', data);
 		const user = socket.data.user;
 		if (!user) {
 			socketUtil.error('[ChannelChanged] User not found');
@@ -25,7 +25,7 @@ export const addChannelListener = (io: typedServer, socket: typedSocket) => {
 			return;
 		}
 
-		const exists = await channelExists(channelId);
+		const exists = await channelExists(data.id);
 		if (!exists) {
 			console.error('[ChannelChanged] Channel does not exist');
 			return;
@@ -33,11 +33,11 @@ export const addChannelListener = (io: typedServer, socket: typedSocket) => {
 
 		const channel = await prisma.channel.update({
 			where: {
-				id: channelId
+				id: data.id
 			},
 			data: { ...parsedData.data }
 		});
-		const users = await getUsersByChannelId(channelId);
+		const users = await getUsersByChannelId(data.id);
 
 		const returnData: ChannelUpdateApiData = {
 			...data,
@@ -45,7 +45,7 @@ export const addChannelListener = (io: typedServer, socket: typedSocket) => {
 		};
 
 		users.forEach((user) => {
-			io.to(roomFromUser(user.id)).emit('ChannelChanged', channelId, returnData);
+			io.to(roomFromUser(user.id)).emit('ChannelChanged', returnData);
 		});
 		socket.emit('ChannelFinishedChanging', returnData);
 	});
@@ -113,7 +113,7 @@ export const addChannelListener = (io: typedServer, socket: typedSocket) => {
 
 		socketUtil.log('[ChannelSwitch] Switching channel', {
 			id: channelId,
-			last: user.currData?.channel.id,
+			last: user.channel?.id,
 			rooms: socket.rooms
 		});
 		switchChannel(socket, user, channelId);
@@ -136,29 +136,27 @@ const updateLastChannel = async (user: UserSocketData, channelId: number | null)
 	});
 
 	if (!channelId) {
-		user.currData = null;
+		user.channel = null;
+		user.channelUser = null;
 		return;
 	}
 
-	const currChannel = user.channels.find((channel) => channel.id === channelId);
-	const currChannelUser = user.channelUsers.find((channelUser) => channelUser.channelId === channelId);
+	const currChannel = await getChannelById(channelId);
+	const currChannelUser = await getChannelUserByData(user.id, channelId);
 
 	if (!currChannel || !currChannelUser) {
 		throw new Error('[socket] [updateLastChannel] Channel data not found');
 	}
 
-	user.currData = {
-		channel: currChannel,
-		channelUser: currChannelUser
-	};
+	user.channel = currChannel;
+	user.channelUser = currChannelUser;
 };
 
 const leaveChannel = async (socket: typedSocket, user: UserSocketData, channelId: number) => {
-	if (user.currData?.channel.id === channelId) {
+	if (user.channel?.id === channelId) {
 		updateLastChannel(user, null);
 	}
 
-	user.channels = user.channels.filter((channel) => channel.id !== channelId);
 	await prisma.channelUser.delete({
 		where: {
 			channelId_userId: {
@@ -168,6 +166,8 @@ const leaveChannel = async (socket: typedSocket, user: UserSocketData, channelId
 		}
 	});
 
+	user.channels = user.channels.filter((channel) => channel !== channelId);
+
 	socket.broadcast.to(roomFromChannel(channelId)).emit('ChannelLeft', user.id);
 	socket.emit('ChannelFinishedLeaving', true);
 	socket.leave(roomFromChannel(channelId));
@@ -176,12 +176,6 @@ const leaveChannel = async (socket: typedSocket, user: UserSocketData, channelId
 };
 
 const joinNewChannel = async (socket: typedSocket, user: UserSocketData, channelId: number) => {
-	const channel = await getChannelById(channelId);
-	user.channels.push({
-		id: channel.id,
-		roles: channel.roles
-	});
-
 	const { id } = await prisma.channelUser.create({
 		data: {
 			channel: {
@@ -197,11 +191,7 @@ const joinNewChannel = async (socket: typedSocket, user: UserSocketData, channel
 		}
 	});
 
-	user.channelUsers.push({
-		channelId: channelId,
-		roles: channel.roles,
-		id: id
-	});
+	user.channels.push(id);
 
 	socket.emit('ChannelNewFinishedJoining', id);
 	socket.broadcast.to(roomFromChannel(channelId)).emit('ChannelNewJoined', user.id);
@@ -209,8 +199,8 @@ const joinNewChannel = async (socket: typedSocket, user: UserSocketData, channel
 };
 
 const switchChannel = async (socket: typedSocket, user: UserSocketData, channelId: number) => {
-	if (user.currData) {
-		socket.leave(roomFromChannel(user.currData.channel.id));
+	if (user.channel) {
+		socket.leave(roomFromChannel(user.channel.id));
 	}
 
 	updateLastChannel(user, channelId);

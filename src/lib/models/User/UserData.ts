@@ -1,28 +1,16 @@
 import type { z } from 'zod';
 
-import type { CurrDataSchema, CurrUserApiSchema, CurrUserSchema, UserSocketSchema } from './CurrUserSchema';
-import type { ChannelUserSchema, UserChangedSchema, UserSchema } from './UserSchema';
+import type {
+	ChannelSocketSchema,
+	ChannelUserSocketSchema,
+	RoleSocketSchema,
+	UserSocketSchema
+} from './CurrUserSchema';
+import type { ChannelUserSchema, UserApiSchema, UserChangedSchema, UserSchema } from './UserSchema';
 
-export type ChannelUserData = z.infer<typeof ChannelUserSchema>;
-
-export type BaseUserData = {
-	id: number;
-	name: string;
-	avatar: string;
-	status: UserStatus;
-	online: boolean;
-	createdAt: Date;
-};
+export type ChannelUserData = z.infer<typeof ChannelUserSchema> | null;
 
 export type UserData = z.infer<typeof UserSchema>;
-
-export type CurrData = z.infer<typeof CurrDataSchema>;
-
-export type UserSocketData = z.infer<typeof UserSocketSchema>;
-
-export type CurrUserData = z.infer<typeof CurrUserSchema>;
-
-export type CurrUserApiData = z.infer<typeof CurrUserApiSchema>;
 
 //without id and online since they are not updatable by the user
 export type UserChangedData = z.infer<typeof UserChangedSchema>;
@@ -59,3 +47,13 @@ export const getStatusName = (status: UserStatus | undefined) => {
 export const UserConstr = {
 	name: { maxLength: 32, minLength: 1 }
 };
+
+export type RoleSocketData = z.infer<typeof RoleSocketSchema>;
+
+export type ChannelSocketData = z.infer<typeof ChannelSocketSchema>;
+
+export type ChannelUserSocketData = z.infer<typeof ChannelUserSocketSchema>;
+
+export type UserSocketData = z.infer<typeof UserSocketSchema>;
+
+export type UserApiData = z.infer<typeof UserApiSchema>;

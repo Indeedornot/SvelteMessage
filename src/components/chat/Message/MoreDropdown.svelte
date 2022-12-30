@@ -1,13 +1,12 @@
 <script lang="ts">
 	import { Edit, Trash } from '$components/icons';
-	import type { CurrUserData } from '$lib/models';
+	import type { UserData } from '$lib/models';
 	import { UserStore } from '$lib/stores';
 
 	export let onEdit: () => void;
 	export let onRemove: () => void;
 	export let senderId: number;
 
-	let user: CurrUserData | null;
 	$: user = $UserStore;
 </script>
 

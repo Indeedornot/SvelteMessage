@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { UserStore } from '$lib/stores';
+	import { ChannelStore } from '$lib/stores';
 	import { writable } from 'svelte/store';
 
 	import ChannelContent from './Channels/ChannelContent.svelte';
@@ -19,7 +19,7 @@
 		<div class="flex min-h-0 w-full flex-grow flex-row">
 			<Channels />
 			<div class="flex h-full min-w-0 flex-grow bg-default">
-				{#if $UserStore?.currData}
+				{#if $ChannelStore}
 					<ChannelContent canSend={canSend} showUsers={showUsers} />
 				{/if}
 			</div>

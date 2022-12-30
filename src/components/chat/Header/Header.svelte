@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Refresh, Users } from '$components/icons';
-	import { UserStore } from '$lib/stores';
+	import { fetchUser } from '$lib/helpers/backend';
 
 	import CurrUserTab from './CurrUserTab.svelte';
 
@@ -10,7 +10,7 @@
 	const refetchUser = async () => {
 		if (fetchingUser) return;
 		fetchingUser = true;
-		UserStore.fetch();
+		await fetchUser(false);
 		fetchingUser = false;
 	};
 </script>

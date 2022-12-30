@@ -54,24 +54,3 @@
 		</div>
 	</div>
 </div>
-
-<!-- 
-	
-<div class="flex w-full flex-none flex-row items-start rounded-md bg-subtle py-2.5 px-1.5">
-	<div class="h-[50px]"/>
-	<div class="flex flex-grow px-2">
-		<span
-			contenteditable="true"
-			bind:this={inputBar}
-			on:keydown={(e) => {
-				if (e.key !== 'Enter') return;
-				sendMessage();
-			}}
-			use:maxLength={{ maxLength: MessageConstr.text.maxLength }}
-			class="box-border w-full break-all border-0 border-b-2 bg-transparent px-0.5 text-default caret-default outline-none"
-		/>
-	</div>
-	<div class="h-[50px]"/>
-</div>
-
- -->

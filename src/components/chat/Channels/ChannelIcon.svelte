@@ -1,7 +1,6 @@
 <script lang="ts">
 	import ContextMenu from '$components/chat/Channels/Menu/ContextMenu.svelte';
 	import type { ChannelData } from '$lib/models';
-	import { portal } from 'svelte-portal';
 
 	import Avatar from '../Avatar.svelte';
 

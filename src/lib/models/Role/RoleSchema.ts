@@ -13,8 +13,6 @@ export const RoleSchema = z.object({
 	hidden: z.boolean()
 });
 
-export const RoleSocketSchema = RoleSchema.omit({ hidden: true, name: true });
-
 export const RoleCreateScheme = z.object({
 	name: roleNameSchema,
 	permissions: z.array(z.number())

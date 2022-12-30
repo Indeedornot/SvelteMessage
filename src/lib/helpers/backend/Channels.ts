@@ -8,23 +8,23 @@ import {
 	type MessageData,
 	type UserData
 } from '$lib/models';
-import { LeftUsersStore, MessageCache, UserStore, UsersCache } from '$lib/stores';
+import { ChannelStore, ChannelsCache, LeftUsersStore, MessageCache, UserStore, UsersCache } from '$lib/stores';
 import { get } from 'svelte/store';
 
 import { browserUtils, updateRef } from '../jsUtils';
-import { getChannelUserById, getUserById } from './User';
+import { getChannelUserByData, getUserById } from './User';
 
 export const addChannelListener = () => {
-	io.on('ChannelChanged', async (channelId: number, data: ChannelUpdateApiData) => {
-		UserStore.crud.channels.update(channelId, data);
+	io.on('ChannelChanged', async (data: ChannelUpdateApiData) => {
+		ChannelsCache.crud.update(data);
 	});
 
 	io.on('ChannelNewJoined', async (userId: number) => {
-		const currChannel = get(UserStore)?.currData?.channel.id;
+		const currChannel = get(ChannelStore);
 		if (!currChannel) return;
 
 		const oldUser = LeftUsersStore.crud.remove(userId);
-		const user = await getUserById(userId, currChannel);
+		const user = await getUserById(userId, currChannel.id);
 
 		if (oldUser) {
 			//since oldUser is still attached to messages, we need to update it
@@ -39,7 +39,7 @@ export const addChannelListener = () => {
 	});
 
 	io.on('ChannelRemoved', (channelId: number) => {
-		UserStore.crud.channels.remove(channelId);
+		ChannelsCache.crud.remove(channelId);
 	});
 
 	io.on('ChannelLeft', (userId: number) => {
@@ -54,10 +54,11 @@ export const switchChannel = async (channelId: number) => {
 	const storedUser = get(UserStore);
 	if (!storedUser) return;
 
-	const newChannel = storedUser.channels.find((channel) => channel.id === channelId);
-	const newChannelUser = storedUser.channelUsers.find((channelUser) => channelUser.channelId === channelId);
+	const newChannel = get(ChannelsCache).find((channel) => channel.id === channelId);
+	const newChannelUser = await getChannelUserByData(channelId, storedUser.id);
 	if (!newChannel || !newChannelUser) {
-		UserStore.crud.currData.set(null);
+		ChannelStore.crud.set(null);
+		UserStore.crud.channelUser.set(null);
 		return;
 	}
 
@@ -72,21 +73,22 @@ export const switchChannel = async (channelId: number) => {
 		});
 	});
 	if (!success) {
-		UserStore.crud.currData.set(null);
+		ChannelStore.crud.set(null);
+		UserStore.crud.channelUser.set(null);
 		return;
 	}
 
 	await fetchChannelData(channelId);
-	UserStore.crud.currData.set({
-		channel: newChannel,
-		channelUser: newChannelUser
-	});
+
+	ChannelStore.crud.set(newChannel);
+	UserStore.crud.channelUser.set(newChannelUser);
 };
 
 export const fetchChannelData = async (channelId: number) => {
 	const channel = await fetchChannelByIdWithData(channelId);
 	if (!channel) {
-		UserStore.crud.currData.set(null);
+		ChannelStore.crud.set(null);
+		UserStore.crud.channelUser.set(null);
 		return;
 	}
 
@@ -105,28 +107,17 @@ export const joinNewChannel = (channelId: number): Promise<boolean> => {
 		}
 
 		io.emit('ChannelNewJoining', channelId);
-		io.once('ChannelNewFinishedJoining', async (channelUserId) => {
-			if (channelUserId === null) {
-				resolve(false);
-				return;
-			}
-
+		io.once('ChannelNewFinishedJoining', async () => {
 			const channel = await getChannelById(channelId);
 			if (!channel) {
 				resolve(false);
 				return;
 			}
 
-			const channelUser = await getChannelUserById(channelUserId);
-			if (!channelUser) {
-				resolve(false);
-				return;
-			}
-
-			UserStore.crud.channels.add(channel);
-			UserStore.crud.channelUsers.add(channelUser);
+			ChannelsCache.crud.add(channel);
 
 			browserUtils.log('ChannelNewFinishedJoining');
+
 			resolve(true);
 		});
 	});
@@ -141,6 +132,9 @@ export const leaveChannel = (channelId: number): Promise<void> => {
 			return;
 		}
 
+		const currChannel = get(ChannelStore);
+		if (!currChannel) return;
+
 		io.emit('ChannelLeft', channelId);
 		io.once('ChannelFinishedLeaving', (success) => {
 			if (!success) {
@@ -148,17 +142,16 @@ export const leaveChannel = (channelId: number): Promise<void> => {
 				return;
 			}
 
-			if (user.currData?.channel.id === channelId) {
-				UserStore.crud.currData.set(null);
+			if (currChannel.id === channelId) {
+				UserStore.crud.channelUser.set(null);
 				UsersCache.crud.clear();
 				MessageCache.crud.clear();
 			}
 
-			UserStore.crud.channelUsers.remove(channelId);
 			resolve();
 		});
 
-		UserStore.crud.channels.remove(channelId);
+		ChannelsCache.crud.remove(channelId);
 	});
 };
 
@@ -209,7 +202,7 @@ export const fetchChannelByIdWithData = async (channelId: number) => {
 export const createChannel = async (data: ChannelCreateData) => {
 	const channel = await trpc().channel.create.query(data);
 	await joinNewChannel(channel.id);
-	UserStore.crud.channels.add(channel);
+	ChannelsCache.crud.add(channel);
 };
 
 export const getChannelById = async (channelId: number): Promise<ChannelData | null> => {

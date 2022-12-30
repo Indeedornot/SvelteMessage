@@ -2,7 +2,7 @@
 	import DropdownBase from '$components/helpers/Dropdown/DropdownBase.svelte';
 	import { updateUser } from '$lib/helpers/backend';
 	import { getDifferentInObject, isEmptyObject } from '$lib/helpers/jsUtils';
-	import type { UserChangedData } from '$lib/models';
+	import type { UserChangedData, UserData } from '$lib/models';
 	import { UserStore } from '$lib/stores';
 
 	import Avatar from '../Avatar.svelte';
@@ -13,23 +13,23 @@
 	export let canShow = true;
 	export let showTooltip = true;
 
-	let updateData = {
-		name: $UserStore?.name ?? '',
-		avatar: $UserStore?.avatar ?? ''
-	};
-
-	$: $UserStore, resetDisplay();
-	const resetDisplay = () => {
-		updateData = {
-			name: $UserStore?.name ?? '',
-			avatar: $UserStore?.avatar ?? ''
+	const getNewDisplayData = () => {
+		return {
+			name: user?.name ?? '',
+			avatar: user?.avatar ?? ''
 		};
 	};
+	const resetDisplay = () => (updateData = getNewDisplayData());
+
+	let updateData = getNewDisplayData();
+
+	$: user = $UserStore;
+	$: user, resetDisplay();
 
 	let isUpdating = false;
 	const updateDisplay = async () => {
-		if (isUpdating || !$UserStore) return;
-		const sendData: UserChangedData = getDifferentInObject($UserStore, updateData);
+		if (isUpdating || !user) return;
+		const sendData: UserChangedData = getDifferentInObject(user, updateData);
 		if (isEmptyObject(sendData)) {
 			return;
 		}
@@ -57,13 +57,11 @@
 		on:click={() => (showTooltip = !showTooltip)}
 	>
 		<div class="flex w-[32px] flex-none">
-			<Avatar width={32} height={32} src={$UserStore?.avatar} status={$UserStore?.status} />
+			<Avatar width={32} height={32} src={user?.avatar} status={user?.status} />
 		</div>
 		<div class="ml-1.5 flex min-w-0 flex-grow flex-col items-start">
-			<span class="w-full truncate text-left text-[14px] font-semibold leading-[18px] text-default"
-				>{$UserStore?.name}</span
-			>
-			<span class="text-[12px] leading-[16px] text-muted">{$UserStore?.id}</span>
+			<span class="w-full truncate text-left text-[14px] font-semibold leading-[18px] text-default">{user?.name}</span>
+			<span class="text-[12px] leading-[16px] text-muted">{user?.id}</span>
 		</div>
 	</button>
 	<div slot="dropdown" class="flex flex-none items-center rounded-md border-2 border-subtle bg-overlay">

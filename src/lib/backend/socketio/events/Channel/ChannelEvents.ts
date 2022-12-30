@@ -6,7 +6,7 @@ export interface ChannelSTCEvents {
 	ChannelNewJoined: (userId: number) => void; //sends message about new user joining
 	ChannelNewFinishedJoining: (channelUserId: number | null) => void; //acknowledges a channel join
 
-	ChannelChanged: (channelId: number, data: ChannelUpdateApiData) => void; //acknowledges a channel join
+	ChannelChanged: (data: ChannelUpdateApiData) => void; //acknowledges a channel join
 	ChannelFinishedChanging: (data: ChannelUpdateApiData) => void; //acknowledges a channel join
 
 	ChannelLeft: (userId: number) => void; //sends message about user leaving
@@ -20,7 +20,7 @@ export interface ChannelCTSEvents {
 
 	ChannelNewJoining: (channelId: number) => void; //Event with acknowledgement
 
-	ChannelChanged: (channelId: number, data: ChannelChangedData) => void; //Event with acknowledgement
+	ChannelChanged: (data: ChannelChangedData) => void; //Event with acknowledgement
 
 	ChannelLeft: (channelId: number) => void; //Event with acknowledgement
 

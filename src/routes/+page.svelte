@@ -2,14 +2,7 @@
 	import { browser } from '$app/environment';
 	import Chat from '$components/chat/Chat.svelte';
 	import { io } from '$lib/backend/socketio/socket-client';
-	import {
-		addChannelListener,
-		addMessageListener,
-		addUserListener,
-		fetchChannelData,
-		goOnline
-	} from '$lib/helpers/backend';
-	import { UserStore } from '$lib/stores';
+	import { addChannelListener, addMessageListener, addUserListener, fetchUser } from '$lib/helpers/backend';
 	import { onDestroy, onMount } from 'svelte';
 
 	let canSend = false;
@@ -20,12 +13,8 @@
 	});
 
 	const setup = async () => {
-		await UserStore.fetch().then(async (u) => {
-			await goOnline(u);
-			if (u?.currData?.channel?.id) {
-				await fetchChannelData(u.currData.channel.id);
-			}
-			canSend = true;
+		await fetchUser(true).then((user) => {
+			if (user) canSend = true;
 		});
 
 		addUserListener();
@@ -39,6 +28,7 @@
 </script>
 
 <svelte:body on:contextmenu|preventDefault={() => {}} />
+
 <div class="flex h-full w-full flex-none items-center justify-center">
 	<div class="h-[775px] w-[650px]">
 		<Chat canSend={canSend} />

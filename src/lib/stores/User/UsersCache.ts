@@ -1,10 +1,8 @@
-import { getUserById } from '$lib/helpers/backend/User';
 import { updateRef } from '$lib/helpers/jsUtils';
 import type { UserChangedData, UserData } from '$lib/models';
-import { derived, get, writable } from 'svelte/store';
+import { derived, writable } from 'svelte/store';
 
 import { MessageCache } from '../MessageCache';
-import { UserStore } from './UserCache';
 
 const createLeftUsersStore = () => {
 	const { subscribe, set: setInternal, update } = writable<UserData[]>([]);
@@ -102,35 +100,15 @@ const createUsersStore = () => {
 		},
 
 		setOnline: async (userId: number) => {
-			const user = get(UsersCache).find((user) => user.id === userId);
-			if (!user) {
-				await fetch.user(userId);
-				return;
-			}
-
 			update((users) => {
+				const user = users.find((user) => user.id === userId);
+				if (!user) return users;
+
 				user.online = true;
 				return users;
 			});
 
 			MessageCache.crud.causeUpdate();
-		}
-	};
-
-	const fetch = {
-		user: async (userId: number) => {
-			const currChannel = get(UserStore)?.currData?.channel.id;
-			if (!currChannel) return;
-
-			const user = get(UsersCache).find((user) => user.id === userId);
-			if (!user) {
-				await getUserById(userId, currChannel).then((fetchedUser) => {
-					if (fetchedUser)
-						update((users) => {
-							return [...users, fetchedUser];
-						});
-				});
-			}
 		}
 	};
 

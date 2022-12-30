@@ -1,8 +1,8 @@
-import type { Role } from '@prisma/client';
+import type { Role, User } from '@prisma/client';
 
 import type { Buffer } from 'node:buffer';
 
-import type { ChannelData, ChannelUserData, MessageApiData, RoleData, UserData } from '../../models';
+import type { ChannelData, ChannelUserData, MessageApiData, RoleData, UserApiData, UserData } from '../../models';
 import { prisma } from './prisma';
 
 const toArrayInteger = (buffer: Buffer): number[] => {
@@ -83,7 +83,7 @@ export const getMessagesByChannelId = async (channelId: number, count: number): 
 	}));
 };
 
-export const getUsersByChannelId = async (channelId: number, exclude: number[] = []): Promise<UserData[]> => {
+export const getUsersByChannelId = async (channelId: number, exclude: number[] = []): Promise<UserApiData[]> => {
 	const users = await prisma.channelUser.findMany({
 		where: {
 			channelId: channelId,
@@ -116,24 +116,16 @@ export const getUsersByChannelId = async (channelId: number, exclude: number[] =
 	});
 };
 
-export const getUserById = async (input: { id: number; channelId: number }): Promise<UserData> => {
+/** Returns UserData with channelUser of channelId or if none - currChannelId */
+export const getUserById = async (input: { id: number; channelId?: number }): Promise<UserApiData> => {
 	const user = await prisma.user.findUniqueOrThrow({
-		where: { id: input.id },
-		include: {
-			channelUser: {
-				where: { channelId: input.channelId },
-				take: 1,
-				include: { roles: true }
-			}
-		}
+		where: { id: input.id }
 	});
 
-	const channelUser = user.channelUser[0]
-		? {
-				...user.channelUser[0],
-				roles: mapRoles(user.channelUser[0].roles)
-		  }
-		: null;
+	let channelUser: ChannelUserData | null = null;
+	if (input.channelId || user.currChannelId) {
+		channelUser = await getChannelUserByData(user.id, input.channelId ?? user.currChannelId!);
+	}
 
 	return {
 		...user,
@@ -145,9 +137,7 @@ export const getUserById = async (input: { id: number; channelId: number }): Pro
 export const getChannelUsersByUserId = async (userId: number): Promise<ChannelUserData[]> => {
 	const channelUsers = await prisma.channelUser.findMany({
 		where: { userId: userId },
-		include: {
-			roles: true
-		}
+		include: { roles: true }
 	});
 
 	return channelUsers.map((x) => ({
@@ -156,12 +146,24 @@ export const getChannelUsersByUserId = async (userId: number): Promise<ChannelUs
 	}));
 };
 
+export const getChannelUserByData = async (userId: number, channelId: number): Promise<ChannelUserData | null> => {
+	const channelUser = await prisma.channelUser.findUnique({
+		where: { channelId_userId: { channelId: channelId, userId: userId } },
+		include: { roles: true }
+	});
+
+	if (!channelUser) return null;
+
+	return {
+		...channelUser,
+		roles: mapRoles(channelUser.roles)
+	};
+};
+
 export const getChannelById = async (channelId: number): Promise<ChannelData> => {
 	const channel = await prisma.channel.findUniqueOrThrow({
 		where: { id: channelId },
-		include: {
-			roles: true
-		}
+		include: { roles: true }
 	});
 
 	return {
