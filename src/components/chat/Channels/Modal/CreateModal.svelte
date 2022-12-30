@@ -2,7 +2,7 @@
 	import Avatar from '$components/chat/Avatar.svelte';
 	import { Exit } from '$components/icons';
 	import { generateRandomAvatar } from '$lib/helpers/RandomAvatar';
-	import { createChannel as createChannelApi } from '$lib/helpers/backend/Channels';
+	import { createChannel as createChannelApi } from '$lib/backend/Channels';
 	import { ChannelCreateSchema, avatarSchema } from '$lib/models';
 	import { UserStore } from '$lib/stores';
 

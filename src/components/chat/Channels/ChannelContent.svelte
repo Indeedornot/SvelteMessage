@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { sendNewMessage } from '$lib/helpers/backend';
+	import { sendNewMessage } from '$lib/backend';
 	import type { MessageCreateData } from '$lib/models';
 	import { MessageCache, UserStore } from '$lib/stores';
 	import { writable } from 'svelte/store';

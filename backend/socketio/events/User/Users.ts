@@ -1,5 +1,5 @@
-import { UserChangedSchema, UserSocketSchema } from '../../../../models';
-import { prisma } from '../../../prisma/prisma';
+import { UserChangedSchema, UserSocketSchema } from '../../../imports/models';
+import { prisma } from '../../../prisma';
 import type { typedServer, typedSocket } from '../../socket-handler';
 import { roomsFromChannels, socketUtil } from '../../socketUtils';
 

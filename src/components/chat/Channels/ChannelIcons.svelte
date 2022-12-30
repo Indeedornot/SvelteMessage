@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Plus } from '$components/icons';
-	import { switchChannel as switchChannelApi } from '$lib/helpers/backend/Channels';
+	import { switchChannel as switchChannelApi } from '$lib/backend/Channels';
 	import { ChannelStore, ChannelsCache } from '$lib/stores';
 
 	import ChannelIcon from './ChannelIcon.svelte';

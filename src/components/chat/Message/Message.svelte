@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { changeMessage, deleteMessage } from '$lib/helpers/backend';
+	import { changeMessage, deleteMessage } from '$lib/backend';
 	import type { MessageData } from '$lib/models';
 	import { MessageCache } from '$lib/stores';
 

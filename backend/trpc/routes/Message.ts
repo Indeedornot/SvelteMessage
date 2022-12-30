@@ -1,4 +1,4 @@
-import { prisma } from '$lib/backend/prisma/prisma';
+import { prisma } from '$backend/prisma/prisma';
 import { MessageApiScheme, idSchema } from '$lib/models';
 import { z } from 'zod';
 

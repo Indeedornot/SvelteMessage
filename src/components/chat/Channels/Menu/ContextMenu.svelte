@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { leaveChannel } from '$lib/helpers/backend';
+	import { leaveChannel } from '$lib/backend';
 	import { clickOutside } from '$lib/helpers/clickOutside';
 	import type { ChannelData } from '$lib/models';
 	import { portal } from 'svelte-portal';

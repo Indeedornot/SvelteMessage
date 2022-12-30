@@ -1,4 +1,4 @@
-import type { UserSocketData } from '../../models';
+import type { UserSocketData } from '../imports/models';
 import type {
 	ChannelCTSEvents,
 	ChannelSTCEvents,

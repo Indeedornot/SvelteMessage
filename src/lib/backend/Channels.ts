@@ -1,5 +1,3 @@
-import { io } from '$lib/backend/socketio/socket-client';
-import { trpc } from '$lib/backend/trpc/client';
 import {
 	ApiToMsgData,
 	type ChannelCreateData,
@@ -11,8 +9,9 @@ import {
 import { ChannelStore, ChannelsCache, LeftUsersStore, MessageCache, UserStore, UsersCache } from '$lib/stores';
 import { get } from 'svelte/store';
 
-import { browserUtils, updateRef } from '../jsUtils';
+import { browserUtils, updateRef } from '$lib/helpers/jsUtils';
 import { getChannelUserByData, getUserById } from './User';
+import { io, trpc } from './clients';
 
 export const addChannelListener = () => {
 	io.on('ChannelChanged', async (data: ChannelUpdateApiData) => {

@@ -1,4 +1,4 @@
-import { type MessageApiData, MessageCreateScheme, type MessageUpdateData } from '../../../../models';
+import { type MessageApiData, MessageCreateScheme, type MessageUpdateData } from '../../../imports/models';
 import { prisma } from '../../../prisma/prisma';
 import type { typedServer, typedSocket } from '../../socket-handler';
 import { roomFromChannel, socketUtil } from '../../socketUtils';

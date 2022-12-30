@@ -1,14 +1,11 @@
 //Needs to use relative imports due to being processed in vite.config.js
 import { Server, Socket } from 'socket.io';
 
-
-
-import { UserSocketSchema, UserStatus } from '../../models';
+import { UserSocketSchema, UserStatus } from '../imports/models';
 import { prisma } from '../prisma/prisma';
 import { addChannelListener, addMessageListener, addUserListener } from './events';
 import type { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from './socket-events';
 import { roomFromChannel, roomFromUser, roomsFromChannels, socketUtil } from './socketUtils';
-
 
 export type typedServer = Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
 export type typedSocket = Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;

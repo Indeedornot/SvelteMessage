@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Refresh, Users } from '$components/icons';
-	import { fetchUser } from '$lib/helpers/backend';
+	import { fetchUser } from '$lib/backend';
 
 	import CurrUserTab from './CurrUserTab.svelte';
 

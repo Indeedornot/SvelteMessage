@@ -1,7 +1,6 @@
 // src/lib/realtime.js
+import type { ClientToServerEvents, ServerToClientEvents } from '$backend/socketio/socket-events';
 import { Socket, io as ioClient } from 'socket.io-client';
-
-import type { ClientToServerEvents, ServerToClientEvents } from './socket-events';
 
 const ENDPOINT = 'http://localhost:5173';
 

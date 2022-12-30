@@ -1,9 +1,8 @@
-import { prisma } from '$lib/backend/prisma/prisma';
+import { getUserById, getUsersByChannelId, prisma } from '$backend/prisma';
 import { generateRandomAvatar } from '$lib/helpers/RandomAvatar';
 import { type UserApiData, UserApiSchema, type UserData, UserSchema, UserStatus, idSchema } from '$lib/models';
 import { z } from 'zod';
 
-import { getUserById, getUsersByChannelId } from '../../prisma/helpers';
 import { logger } from '../middleware/logger';
 import { t } from '../t';
 

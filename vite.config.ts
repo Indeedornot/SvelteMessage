@@ -1,6 +1,6 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 
-import { injectSocketIO } from './src/lib/backend/socketio/socket-handler';
+import { injectSocketIO } from './backend/socketio/socket-handler';
 
 const webSocketServer = {
 	name: 'sveltekit-socket-io',

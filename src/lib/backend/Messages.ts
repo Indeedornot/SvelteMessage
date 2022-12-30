@@ -1,4 +1,4 @@
-import { io } from '$lib/backend/socketio/socket-client';
+import { browserUtils } from '$lib/helpers/jsUtils';
 import {
 	ApiToMsgData,
 	type MessageApiData,
@@ -10,7 +10,7 @@ import {
 import { MessageCache, UserStore, UsersCache } from '$lib/stores';
 import { get } from 'svelte/store';
 
-import { browserUtils } from '../jsUtils';
+import { io } from './clients';
 
 export const addMessageListener = () => {
 	io.on('Message', async (message: MessageApiData) => {

@@ -1,4 +1,10 @@
-import { prisma } from '$lib/backend/prisma/prisma';
+import {
+	getChannelsByUserId,
+	getMessagesByChannelId,
+	getRolesByChannelId,
+	getUsersByChannelId,
+	prisma
+} from '$backend/prisma';
 import {
 	type ChannelApiData,
 	ChannelApiSchema,
@@ -9,12 +15,6 @@ import {
 } from '$lib/models';
 import { z } from 'zod';
 
-import {
-	getChannelsByUserId,
-	getMessagesByChannelId,
-	getRolesByChannelId,
-	getUsersByChannelId
-} from '../../prisma/helpers';
 import { logger } from '../middleware/logger';
 import { t } from '../t';
 

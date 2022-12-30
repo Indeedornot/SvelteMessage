@@ -1,4 +1,4 @@
-import type { MessageApiData, MessageChangedData, MessageCreateData, MessageUpdateData } from '../../../../models';
+import type { MessageApiData, MessageChangedData, MessageCreateData, MessageUpdateData } from '../../../imports/models';
 
 export interface MessageSTCEvents {
 	Message: (message: MessageApiData) => void; // Receive incoming messages and broadcast them

@@ -1,12 +1,10 @@
-import { getChannelById, getChannelUserByData } from '../../../../backend/prisma/helpers';
 import {
 	type ChannelChangedData,
 	type ChannelUpdateApiData,
 	ChannelUpdateSchema,
 	type UserSocketData
-} from '../../../../models';
-import { getUsersByChannelId } from '../../../prisma/helpers';
-import { prisma } from '../../../prisma/prisma';
+} from '../../../imports/models';
+import { getChannelById, getChannelUserByData, getUsersByChannelId, prisma } from '../../../prisma';
 import type { typedServer, typedSocket } from '../../socket-handler';
 import { roomFromChannel, roomFromUser, socketUtil } from '../../socketUtils';
 

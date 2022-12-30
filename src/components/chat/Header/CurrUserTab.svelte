@@ -1,6 +1,6 @@
 <script lang="ts">
 	import DropdownBase from '$components/helpers/Dropdown/DropdownBase.svelte';
-	import { updateUser } from '$lib/helpers/backend';
+	import { updateUser } from '$lib/backend';
 	import { getDifferentInObject, isEmptyObject } from '$lib/helpers/jsUtils';
 	import type { UserChangedData, UserData } from '$lib/models';
 	import { UserStore } from '$lib/stores';

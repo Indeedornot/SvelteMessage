@@ -1,6 +1,5 @@
-import { getRolesByChannelId, getRolesByChannelUserId } from '$lib/backend/prisma/helpers';
-import { prisma } from '$lib/backend/prisma/prisma';
 import { type ChannelUserData, ChannelUserSchema, idSchema } from '$lib/models';
+import { getRolesByChannelId, getRolesByChannelUserId, prisma } from '$backend/prisma';
 import { z } from 'zod';
 
 import { logger } from '../middleware/logger';

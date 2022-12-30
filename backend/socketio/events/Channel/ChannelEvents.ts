@@ -1,4 +1,4 @@
-import type { ChannelChangedData, ChannelUpdateApiData } from '../../../../models/Channel/ChannelData';
+import type { ChannelChangedData, ChannelUpdateApiData } from '../../../imports/models';
 
 export interface ChannelSTCEvents {
 	ChannelFinishedSwitching: (success: boolean) => void; //acknowledges a channel join

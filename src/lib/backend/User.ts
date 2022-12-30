@@ -1,12 +1,14 @@
-import { io } from '$lib/backend/socketio/socket-client';
-import { trpc } from '$lib/backend/trpc/client';
+import { getUserData, setUserData } from '$lib/helpers/DataStore';
+import { browserUtils } from '$lib/helpers/jsUtils';
 import type { ChannelData, UserApiData, UserChangedData, UserData, UserSocketData } from '$lib/models';
 import { ChannelStore, ChannelsCache, UserStore, UsersCache } from '$lib/stores';
 import { get } from 'svelte/store';
 
-import { getUserData, setUserData } from '../DataStore';
-import { browserUtils } from '../jsUtils';
+
+
 import { fetchChannelData } from './Channels';
+import { io, trpc } from './clients';
+
 
 export const fetchUser = async (makeOnline: boolean) => {
 	return await getSelfUser().then(async (u) => {

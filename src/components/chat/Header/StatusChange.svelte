@@ -1,6 +1,6 @@
 <script lang="ts">
 	import DropdownBase from '$components/helpers/Dropdown/DropdownBase.svelte';
-	import { updateUser } from '$lib/helpers/backend';
+	import { updateUser } from '$lib/backend';
 	import { UserStatus, getStatusColor, getStatusName } from '$lib/models';
 	import { UserStore } from '$lib/stores';
 

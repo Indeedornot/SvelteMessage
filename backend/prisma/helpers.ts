@@ -1,8 +1,8 @@
-import type { Role, User } from '@prisma/client';
+import type { Role } from '@prisma/client';
 
 import type { Buffer } from 'node:buffer';
 
-import type { ChannelData, ChannelUserData, MessageApiData, RoleData, UserApiData, UserData } from '../../models';
+import type { ChannelData, ChannelUserData, MessageApiData, RoleData, UserApiData } from '../imports/models';
 import { prisma } from './prisma';
 
 const toArrayInteger = (buffer: Buffer): number[] => {

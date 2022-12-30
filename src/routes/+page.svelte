@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import Chat from '$components/chat/Chat.svelte';
-	import { io } from '$lib/backend/socketio/socket-client';
-	import { addChannelListener, addMessageListener, addUserListener, fetchUser } from '$lib/helpers/backend';
+	import { addChannelListener, addMessageListener, addUserListener, fetchUser } from '$lib/backend';
+	import { io } from '$lib/backend/clients';
 	import { onDestroy, onMount } from 'svelte';
 
 	let canSend = false;

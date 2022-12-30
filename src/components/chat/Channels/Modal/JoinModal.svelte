@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Exit } from '$components/icons';
-	import { joinNewChannel } from '$lib/helpers/backend';
+	import { joinNewChannel } from '$lib/backend';
 	import { idSchema } from '$lib/models';
 
 	export let closeModal: () => void;
